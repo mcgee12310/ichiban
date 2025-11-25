@@ -77,6 +77,7 @@ export default function EventsSearch() {
   const [filters, setFilters] = useState({
     keyword: "",
     sortOption: "none",
+    maxPrice: null, // hoặc 0, hoặc undefined tùy mặc định
   });
 
   const [userLocation, setUserLocation] = useState({ city: "", district: "" });
@@ -104,7 +105,7 @@ export default function EventsSearch() {
 
   const filtered = useMemo(() => {
     return events.filter((p) => {
-      if (filters.keyword && !p.name.toLowerCase().includes(filters.keyword.toLowerCase()))
+      if (filters.keyword && !p.title.toLowerCase().includes(filters.keyword.toLowerCase()))
         return false;
 
       if (filters.rangeOption === "district") {
@@ -112,6 +113,9 @@ export default function EventsSearch() {
       } else if (filters.rangeOption === "city") {
         if (p.city !== userLocation.city) return false;
       }
+
+      if (filters.maxPrice != null && p.price > filters.maxPrice) return false;
+      
       return true;
     }).sort((a, b) => {
       switch (filters.sortOption) {
