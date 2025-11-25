@@ -12,11 +12,13 @@ const userCity = "Ha Noi"
 const SAMPLE = [
   {
     id: 1,
-    name: "Công viên Thống Nhất",
+    title: "Công viên Thống Nhất",
     categories: ["Công viên", "Thiên nhiên"],
     district: "Hoang Mai",
     city: "Ha Noi",
-    shortDescription: "Công viên rộng, nhiều cây xanh, phù hợp cho gia đình.",
+    description: "Công viên rộng, nhiều cây xanh, phù hợp cho gia đình.",
+    startDatetime: "2024-06-01T08:00:00",
+    endDatetime: "2024-06-01T18:00:00",
     rating: 4.5,
     price: 0,
     image:
@@ -24,10 +26,13 @@ const SAMPLE = [
   },
   {
     id: 2,
-    name: "Quán cà phê Mộc",
+    title: "Quán cà phê Mộc",
     district: "Hai Ba Trung",
     city: "Ha Noi",
-    shortDescription: "Quán nhỏ xinh, cà phê ngon, có không gian đọc sách.",
+    description: "Quán nhỏ xinh, cà phê ngon, có không gian đọc sách.",
+        startDatetime: "2024-06-01T08:00:00",
+    endDatetime: "2024-06-01T18:00:00",
+
     rating: 4.2,
     price: 50000,
     image:
@@ -35,10 +40,13 @@ const SAMPLE = [
   },
   {
     id: 3,
-    name: "Bảo tàng Nghệ thuật",
+    title: "Bảo tàng Nghệ thuật",
     district: "Quan 2",
     city: "HCM",
-    shortDescription: "Triển lãm nghệ thuật đương đại.",
+    description: "Triển lãm nghệ thuật đương đại.",
+        startDatetime: "2024-06-01T08:00:00",
+    endDatetime: "2024-06-01T18:00:00",
+
     rating: 4.8,
     price: 0,
     image:
@@ -46,10 +54,13 @@ const SAMPLE = [
   },
   {
     id: 4,
-    name: "Nhà hàng Biển Xanh",
+    title: "Nhà hàng Biển Xanh",
     district: "Quan 1",
     city: "HCM",
-    shortDescription: "Nhà hàng hải sản tươi sống, view biển đẹp.",
+    description: "Nhà hàng hải sản tươi sống, view biển đẹp.",
+        startDatetime: "2024-06-01T08:00:00",
+    endDatetime: "2024-06-01T18:00:00",
+
     rating: 4.3,
     price: 200000,
     image:

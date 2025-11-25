@@ -1,5 +1,7 @@
 import React from "react";
 import styles from "./EventCard.module.css";
+import { PinIcon } from "lucide-react";
+import { formatDate, formatPrice } from "../../../ultis/format";
 
 export default function EventCard({ place }) {
   return (
@@ -7,7 +9,7 @@ export default function EventCard({ place }) {
       <img src={place.image} alt={place.name} className={styles.itemImage} />
 
       <div className={styles.itemContent}>
-        <h4 className={styles.itemTitle}>{place.name}</h4>
+        <h4 className={styles.itemTitle}>{place.title}</h4>
         {/* ==== Categories ==== */}
         {place.categories?.length > 0 && (
           <div className={styles.categories}>
@@ -20,9 +22,14 @@ export default function EventCard({ place }) {
         )}
         
         <div className={styles.location}>
-          {place.city} • {place.district}
+          📌 {place.district}, {place.city}
         </div>
-        <div className={styles.desc}>{place.shortDescription}</div>
+
+        <div className={styles.date}>
+          {formatDate(place.startDatetime)} - {formatDate(place.endDatetime)}
+        </div>
+
+        <div className={styles.desc}>{place.description}</div>
       </div>
 
       <div className={styles.rightBox}>
@@ -31,7 +38,7 @@ export default function EventCard({ place }) {
 
         {/* Price */}
         <div className={styles.price}>
-          {place.price === 0 ? "Miễn phí" : place.price + "₫"}
+          {place.price === 0 ? "Miễn phí" : formatPrice(place.price)}
         </div>
 
         {/* Button */}
