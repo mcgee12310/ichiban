@@ -7,8 +7,27 @@ const api = axios.create({
 });
 
 // gọi API đăng nhập
-export const loginAPICall = async (username,password) => {
-  const response = await api.post("/login", { username,password });
-  return response.data;
+export const loginAPICall = async (email, password) => {
+  try {
+    const response = await axios.post("http://localhost:8080/api/auth/login", {
+      email,
+      password
+    });
+
+    const data = response.data;
+
+    console.log("Login response data:", response.data.token);
+    
+    // 1. Lưu token vào localStorage (tùy chọn, để giữ login sau khi reload)
+    localStorage.setItem("jwtToken", data.token);
+
+    // 2. Lưu token vào state nếu cần
+    // setToken(token);
+
+    return true;
+  } catch (error) {
+    console.error("Login thất bại", error);
+    throw error;
+  }
 }
   

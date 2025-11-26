@@ -9,34 +9,35 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
-    
+
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private PasswordEncoder passwordEncoder;
-    
+
     @Override
     public void run(String... args) throws Exception {
-        // Tạo user mẫu nếu chưa tồn tại
-        if (!userRepository.existsByUsername("admin")) {
+        // Tạo user admin nếu chưa tồn tại qua email
+        if (!userRepository.existsByEmail("admin@example.com")) {
             User admin = new User();
-            admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin123")); // Mật khẩu: admin123
             admin.setEmail("admin@example.com");
+            admin.setPassword(passwordEncoder.encode("admin123"));
             admin.setFullName("Administrator");
             userRepository.save(admin);
-            System.out.println("Đã tạo user mẫu: username=admin, password=admin123");
+
+            System.out.println("Đã tạo user mẫu: email=admin@example.com, password=admin123");
         }
-        
-        if (!userRepository.existsByUsername("user")) {
+
+        // Tạo user thường
+        if (!userRepository.existsByEmail("user@example.com")) {
             User user = new User();
-            user.setUsername("user");
-            user.setPassword(passwordEncoder.encode("user123")); // Mật khẩu: user123
             user.setEmail("user@example.com");
+            user.setPassword(passwordEncoder.encode("user123"));
             user.setFullName("Sample User");
             userRepository.save(user);
-            System.out.println("Đã tạo user mẫu: username=user, password=user123");
+
+            System.out.println("Đã tạo user mẫu: email=user@example.com, password=user123");
         }
     }
 }

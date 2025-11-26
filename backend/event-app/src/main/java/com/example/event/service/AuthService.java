@@ -22,30 +22,30 @@ public class AuthService {
     
     @Autowired
     private JwtUtil jwtUtil;
-    
+
     public LoginResponse login(LoginRequest loginRequest) {
-        // Tìm người dùng theo username
-        Optional<User> userOptional = userRepository.findByUsername(loginRequest.getUsername());
-        
+
+        // Tìm người dùng theo email
+        Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
+
         if (userOptional.isEmpty()) {
             throw new RuntimeException("Tên đăng nhập hoặc mật khẩu không đúng");
         }
-        
+
         User user = userOptional.get();
-        
-        // So sánh mật khẩu đã nhập với mật khẩu đã mã hóa trong DB
+
+        // So sánh mật khẩu
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new RuntimeException("Tên đăng nhập hoặc mật khẩu không đúng");
         }
-        
+
         // Tạo JWT token
-        String token = jwtUtil.generateToken(user.getUsername());
-        
-        // Trả về response với token
+        String token = jwtUtil.generateToken(user.getEmail());
+
         return new LoginResponse(
-            token,
-            user.getUsername(),
-            "Đăng nhập thành công"
+                token,
+                user.getEmail(),
+                "Đăng nhập thành công"
         );
     }
 }
