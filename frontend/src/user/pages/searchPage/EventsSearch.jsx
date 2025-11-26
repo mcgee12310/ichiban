@@ -70,10 +70,10 @@ const SAMPLE = [
 
 /* ========================= MAIN PAGE ========================= */
 export default function EventsSearch() {
-  const [events, setEvents] = useState(SAMPLE);
+  const [events, setEvents] = useState([]);
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
-  const totalPages = Math.ceil(SAMPLE.length / itemsPerPage);
+  const totalPages = Math.ceil(events.length / itemsPerPage);
   const [filters, setFilters] = useState({
     keyword: "",
     sortOption: "none",
@@ -90,8 +90,8 @@ export default function EventsSearch() {
 
   const fetchData = async () => {
     const data = await getAllEvents();
-
-    setEvents(Array.isArray(data) ? data : SAMPLE);
+    console.log("Fetched events data:", data.events);
+    setEvents(data.events);
   };
 
   useEffect(() => {

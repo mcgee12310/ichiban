@@ -1,0 +1,83 @@
+package com.example.event.model;
+
+import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.time.OffsetDateTime;
+
+@Entity
+@Table(name = "events")
+public class Event {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "event_id")
+    private Long id;
+
+    @Column(nullable = false, length = 255)
+    private String title;
+
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    // Many events can belong to one category
+    @ManyToOne
+    @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "fk_events_category"))
+    private EventCategory category;
+
+    // Many events can belong to one location
+    @ManyToOne
+    @JoinColumn(name = "location_id", foreignKey = @ForeignKey(name = "fk_events_location"))
+    private EventLocation location;
+
+    @Column(name = "start_datetime", nullable = false)
+    private OffsetDateTime startDatetime;
+
+    @Column(name = "end_datetime", nullable = false)
+    private OffsetDateTime endDatetime;
+
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price = BigDecimal.ZERO;
+
+    @Column(nullable = false, length = 20)
+    private String status;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private OffsetDateTime createdAt = OffsetDateTime.now();
+
+    @Column(name = "updated_at")
+    private OffsetDateTime updatedAt;
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public EventCategory getCategory() { return category; }
+    public void setCategory(EventCategory category) { this.category = category; }
+
+    public EventLocation getLocation() { return location; }
+    public void setLocation(EventLocation location) { this.location = location; }
+
+    public OffsetDateTime getStartDatetime() { return startDatetime; }
+    public void setStartDatetime(OffsetDateTime startDatetime) { this.startDatetime = startDatetime; }
+
+    public OffsetDateTime getEndDatetime() { return endDatetime; }
+    public void setEndDatetime(OffsetDateTime endDatetime) { this.endDatetime = endDatetime; }
+
+    public BigDecimal getPrice() { return price; }
+    public void setPrice(BigDecimal price) { this.price = price; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+
+    public OffsetDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
+}
