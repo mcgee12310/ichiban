@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Mail, Lock, User } from 'lucide-react';
-import { loginAPICall } from "../../services/AuthService";
+import { Mail, Lock, User, Calendar } from 'lucide-react';
+import { loginAPICall, signupAPICall } from "../../services/AuthService";
+import { useNavigate } from 'react-router-dom';
+
 // Logo Component
 const Logo = () => (
   <div className="flex justify-center mb-8">
@@ -104,22 +106,15 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const navigate = useNavigate();
 
- const handleLogin = async () => {
+  const handleLogin = async () => {
     setLoading(true);
     try {
       // GỌI API ĐĂNG NHẬP
       const data = await loginAPICall(username, password);
       console.log("Login ok:", data);
-
-      // nếu cần nhớ đăng nhập thì xử lý thêm ở đây
-      if (rememberMe && data.token) {
-        localStorage.setItem("token", data.token);
-      }
-
-      if (onLoginSuccess) {
-        onLoginSuccess(data?.username || username);
-      }
+      navigate('/');
     } catch (err) {
       console.error("Login fail:", err);
       alert("Đăng nhập thất bại");
@@ -131,7 +126,7 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
   return (
     <div className="w-full max-w-md mx-auto px-8 py-10">
       <Logo />
-      
+
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           おかえりなさい！
@@ -182,8 +177,8 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
 
       <Divider text="または" />
 
-      <SocialButton 
-        provider="Google" 
+      <SocialButton
+        provider="Google"
         onClick={() => console.log('Google login')}
       />
 
@@ -204,30 +199,75 @@ const RegisterForm = ({ onSwitchToLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [birthdate, setBirthdate] = useState('');
+  const [gender, setGender] = useState('');
   const [loading, setLoading] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   const handleRegister = async () => {
+    // Validate fullName
+    if (!fullName.trim()) {
+      alert('氏名を入力してください');
+      return;
+    }
+
+    // Validate email
+    if (!email.trim()) {
+      alert('メールアドレスを入力してください');
+      return;
+    }
+
+    // Validate password
+    if (password.length < 8) {
+      alert('パスワードは8文字以上で入力してください');
+      return;
+    }
+
     if (password !== confirmPassword) {
       alert('パスワードが一致しません');
       return;
     }
+
+    // Validate birthdate
+    if (!birthdate) {
+      alert('生年月日を入力してください');
+      return;
+    }
+
+    // Validate gender
+    if (!gender) {
+      alert('性別を選択してください');
+      return;
+    }
+
     if (!agreedToTerms) {
       alert('利用規約に同意してください');
       return;
     }
-    
+
     setLoading(true);
-    setTimeout(() => {
-      console.log('Register:', { email, password });
+
+    try {
+      const response = await signupAPICall(email, password, fullName, birthdate, gender);
+
+      if (response.success) {
+        alert('アカウント登録が完了しました！');
+        // Redirect to login or home page
+        onSwitchToLogin();
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      alert(error.message || '登録に失敗しました。もう一度お試しください。');
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   return (
     <div className="w-full max-w-md mx-auto px-8 py-10">
       <Logo />
-      
+
       <div className="text-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">
           アカウント作成
@@ -236,6 +276,15 @@ const RegisterForm = ({ onSwitchToLogin }) => {
           家族の思い出作りを今すぐ始めましょう
         </p>
       </div>
+
+      <InputField
+        type="text"
+        placeholder="山田 太郎"
+        label="氏名"
+        icon={User}
+        value={fullName}
+        onChange={(e) => setFullName(e.target.value)}
+      />
 
       <InputField
         type="email"
@@ -264,6 +313,56 @@ const RegisterForm = ({ onSwitchToLogin }) => {
         onChange={(e) => setConfirmPassword(e.target.value)}
       />
 
+      <InputField
+        type="date"
+        placeholder=""
+        label="生年月日"
+        icon={Calendar}
+        value={birthdate}
+        onChange={(e) => setBirthdate(e.target.value)}
+      />
+
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-2">
+          性別
+        </label>
+        <div className="flex gap-4">
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="radio"
+              name="gender"
+              value="male"
+              checked={gender === 'male'}
+              onChange={(e) => setGender(e.target.value)}
+              className="w-4 h-4 text-red-500 border-gray-300 cursor-pointer"
+            />
+            <span className="ml-2 text-sm text-gray-700">男性</span>
+          </label>
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="radio"
+              name="gender"
+              value="female"
+              checked={gender === 'female'}
+              onChange={(e) => setGender(e.target.value)}
+              className="w-4 h-4 text-red-500 border-gray-300 cursor-pointer"
+            />
+            <span className="ml-2 text-sm text-gray-700">女性</span>
+          </label>
+          <label className="flex items-center cursor-pointer">
+            <input
+              type="radio"
+              name="gender"
+              value="other"
+              checked={gender === 'other'}
+              onChange={(e) => setGender(e.target.value)}
+              className="w-4 h-4 text-red-500 border-gray-300 cursor-pointer"
+            />
+            <span className="ml-2 text-sm text-gray-700">その他</span>
+          </label>
+        </div>
+      </div>
+
       <div className="mt-6 mb-6">
         <label className="flex items-start cursor-pointer">
           <input
@@ -287,8 +386,8 @@ const RegisterForm = ({ onSwitchToLogin }) => {
 
       <Divider text="または" />
 
-      <SocialButton 
-        provider="Google" 
+      <SocialButton
+        provider="Google"
         onClick={() => console.log('Google register')}
       />
 

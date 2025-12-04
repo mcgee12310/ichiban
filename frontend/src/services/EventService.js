@@ -3,7 +3,7 @@ import axios from "axios";
 const BASE_URL = "http://localhost:8080/api"; 
 // nhớ thống nhất prefix /api nếu BE dùng
 
-const token = localStorage.getItem("jwtToken"); 
+const token = localStorage.getItem("token"); 
 
 const api = axios.create({
   baseURL: BASE_URL,

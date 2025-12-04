@@ -59,7 +59,7 @@ public class SecurityConfig {
                     return config;
                 }))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/**").permitAll() // login/register cho phép
+                        .requestMatchers("/api/auth/**").permitAll() // login/register cho phép
                         .anyRequest().authenticated() // còn lại cần JWT
                 )
                 .authenticationProvider(authenticationProvider())

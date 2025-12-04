@@ -1,6 +1,7 @@
 package com.example.event.controller;
 
 import com.example.event.dto.request.LoginRequest;
+import com.example.event.dto.request.SignupRequest;
 import com.example.event.dto.response.ErrorResponse;
 import com.example.event.dto.response.LoginResponse;
 import com.example.event.service.AuthService;
@@ -9,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -39,6 +42,21 @@ public class AuthController {
                 "/api/auth/login"
             );
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    @PostMapping("/signup")
+    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest request) {
+        try {
+            LoginResponse response = authService.signup(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of(
+                            "message", e.getMessage(),
+                            "success", false
+                    ));
         }
     }
 }
