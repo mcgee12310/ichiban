@@ -2,6 +2,7 @@ package com.example.event.controller;
 
 import com.example.event.dto.request.EventSearchRequest;
 import com.example.event.dto.response.EventSearchResponse;
+import com.example.event.dto.response.EventReviewResponse;
 import com.example.event.service.EventService;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,5 +19,12 @@ public class EventController {
     @PostMapping("/search")
     public EventSearchResponse searchEvents(@RequestBody EventSearchRequest request) {
         return eventService.searchEvents(request.getPage(), request.getSize());
+    }
+
+    @GetMapping("/{eventId}/reviews")
+    public EventReviewResponse getEventReviews(
+            @PathVariable Long eventId,
+            @RequestParam(name = "sort", defaultValue = "recent") String sort) {
+        return eventService.getEventReviews(eventId, sort);
     }
 }

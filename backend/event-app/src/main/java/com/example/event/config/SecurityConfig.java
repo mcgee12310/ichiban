@@ -60,6 +60,7 @@ public class SecurityConfig {
                 }))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll() // login/register cho phép
+                        .requestMatchers("/api/events/**").permitAll() // cho phép public xem sự kiện & reviews
                         .anyRequest().authenticated() // còn lại cần JWT
                 )
                 .authenticationProvider(authenticationProvider())
