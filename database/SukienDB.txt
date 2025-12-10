@@ -1,0 +1,222 @@
+DROP TABLE IF EXISTS event_comments      CASCADE;
+DROP TABLE IF EXISTS event_favorites     CASCADE;
+DROP TABLE IF EXISTS event_registrations CASCADE;
+DROP TABLE IF EXISTS events              CASCADE;
+DROP TABLE IF EXISTS event_locations     CASCADE;
+DROP TABLE IF EXISTS event_categories    CASCADE;
+DROP TABLE IF EXISTS users               CASCADE;
+
+CREATE TABLE users (
+    user_id        BIGSERIAL PRIMARY KEY,
+    email          VARCHAR(255) NOT NULL UNIQUE,
+    password_hash  VARCHAR(255) NOT NULL,
+    full_name      VARCHAR(100) NOT NULL,
+    avatar_url     VARCHAR(500),
+    bio            TEXT,
+    birthdate      DATE,
+    gender         VARCHAR(10),
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at     TIMESTAMPTZ
+);
+
+CREATE TABLE event_categories (
+    category_id    BIGSERIAL PRIMARY KEY,
+    name           VARCHAR(100) NOT NULL,
+    description    TEXT
+);
+
+CREATE TABLE event_locations (
+    location_id    BIGSERIAL PRIMARY KEY,
+    district       VARCHAR(255) NOT NULL,
+    address        VARCHAR(255) NOT NULL,
+    city           VARCHAR(100) NOT NULL,
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE TABLE events (
+    event_id        BIGSERIAL PRIMARY KEY,
+    title           VARCHAR(255) NOT NULL,
+    description     TEXT,
+    category_id     BIGINT,
+    location_id     BIGINT,
+    start_datetime  TIMESTAMPTZ NOT NULL,
+    end_datetime    TIMESTAMPTZ NOT NULL,
+    price           NUMERIC(10,2) NOT NULL DEFAULT 0,
+    status          VARCHAR(20) NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at      TIMESTAMPTZ,
+
+    CONSTRAINT fk_events_category
+        FOREIGN KEY (category_id)
+        REFERENCES event_categories (category_id)
+        ON DELETE SET NULL,
+
+    CONSTRAINT fk_events_location
+        FOREIGN KEY (location_id)
+        REFERENCES event_locations (location_id)
+        ON DELETE SET NULL
+);
+
+CREATE TABLE event_registrations (
+    registration_id BIGSERIAL PRIMARY KEY,
+    user_id         BIGINT NOT NULL,
+    event_id        BIGINT NOT NULL,
+    registered_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    status          VARCHAR(20) NOT NULL,
+    note            TEXT,
+
+    CONSTRAINT fk_reg_user
+        FOREIGN KEY (user_id)
+        REFERENCES users (user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_reg_event
+        FOREIGN KEY (event_id)
+        REFERENCES events (event_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT uq_reg_user_event
+        UNIQUE (user_id, event_id)
+);
+
+CREATE TABLE event_favorites (
+    user_id      BIGINT NOT NULL,
+    event_id     BIGINT NOT NULL,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+    PRIMARY KEY (user_id, event_id),
+
+    CONSTRAINT fk_fav_user
+        FOREIGN KEY (user_id)
+        REFERENCES users (user_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_fav_event
+        FOREIGN KEY (event_id)
+        REFERENCES events (event_id)
+        ON DELETE CASCADE
+);
+
+CREATE TABLE event_comments (
+    comment_id    BIGSERIAL PRIMARY KEY,
+    event_id      BIGINT NOT NULL,
+    user_id       BIGINT NOT NULL,
+    rating        INTEGER CHECK (rating BETWEEN 1 AND 5),
+    comment       TEXT,
+    created_at    TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at    TIMESTAMPTZ,
+
+    CONSTRAINT fk_comment_event
+        FOREIGN KEY (event_id)
+        REFERENCES events (event_id)
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_comment_user
+        FOREIGN KEY (user_id)
+        REFERENCES users (user_id)
+        ON DELETE CASCADE
+);
+
+
+CREATE INDEX idx_events_datetime ON events (start_datetime);
+CREATE INDEX idx_events_status   ON events (status);
+
+CREATE INDEX idx_reg_user  ON event_registrations (user_id);
+CREATE INDEX idx_reg_event ON event_registrations (event_id);
+
+CREATE INDEX idx_fav_user  ON event_favorites (user_id);
+CREATE INDEX idx_fav_event ON event_favorites (event_id);
+
+CREATE INDEX idx_comment_event ON event_comments (event_id);
+CREATE INDEX idx_comment_user  ON event_comments (user_id);
+
+
+-- USERS
+INSERT INTO users (email, password_hash, full_name, avatar_url, bio, birthdate, gender)
+VALUES
+('user1@example.com','pw1','Alice Nguyen',NULL,'Bio 1','2000-01-01','female'),
+('user2@example.com','pw2','Bob Tran',NULL,'Bio 2','1999-02-15','male'),
+('user3@example.com','pw3','Charlie Pham',NULL,'Bio 3','1998-03-20','male'),
+('user4@example.com','pw4','Daisy Le',NULL,'Bio 4','2001-04-10','female'),
+('user5@example.com','pw5','Ethan Vo',NULL,'Bio 5','1997-05-05','male'),
+('user6@example.com','pw6','Fiona Do',NULL,'Bio 6','2002-06-18','female'),
+('user7@example.com','pw7','George Phan',NULL,'Bio 7','1996-07-22','male'),
+('user8@example.com','pw8','Hana Bui',NULL,'Bio 8','2000-08-30','female'),
+('user9@example.com','pw9','Ivan Dang',NULL,'Bio 9','1995-09-09','male'),
+('user10@example.com','pw10','Jenny Ly',NULL,'Bio 10','1998-10-25','female');
+
+-- CATEGORIES
+INSERT INTO event_categories (name, description)
+VALUES
+('Kids','Category 1'),
+('Music','Category 2'),
+('Outdoor','Category 3'),
+('Sports','Category 4'),
+('Food','Category 5'),
+('Workshop','Category 6'),
+('Art','Category 7'),
+('Festival','Category 8'),
+('Community','Category 9'),
+('Science','Category 10');
+
+-- LOCATIONS (district)
+INSERT INTO event_locations (district, address, city)
+VALUES
+('District 1','Addr 1','Hanoi'),
+('District 2','Addr 2','Hanoi'),
+('District 3','Addr 3','Hanoi'),
+('District 4','Addr 4','HCMC'),
+('District 5','Addr 5','HCMC'),
+('District 6','Addr 6','HCMC'),
+('District 7','Addr 7','Danang'),
+('District 8','Addr 8','Danang'),
+('District 9','Addr 9','Hue'),
+('District 10','Addr 10','Hue');
+
+-- EVENTS (status REQUIRED)
+INSERT INTO events (title, description, category_id, location_id, start_datetime, end_datetime, price, status)
+VALUES
+('Event 1','Desc 1',1,1,NOW(),NOW()+INTERVAL '2h',10,'published'),
+('Event 2','Desc 2',2,2,NOW(),NOW()+INTERVAL '3h',20,'draft'),
+('Event 3','Desc 3',3,3,NOW(),NOW()+INTERVAL '4h',0,'published'),
+('Event 4','Desc 4',4,4,NOW(),NOW()+INTERVAL '1h',5,'cancelled'),
+('Event 5','Desc 5',5,5,NOW(),NOW()+INTERVAL '5h',15,'draft'),
+('Event 6','Desc 6',6,6,NOW(),NOW()+INTERVAL '6h',8,'finished'),
+('Event 7','Desc 7',7,7,NOW(),NOW()+INTERVAL '2h',0,'published'),
+('Event 8','Desc 8',8,8,NOW(),NOW()+INTERVAL '3h',30,'published'),
+('Event 9','Desc 9',9,9,NOW(),NOW()+INTERVAL '1h',12,'draft'),
+('Event 10','Desc 10',10,10,NOW(),NOW()+INTERVAL '4h',7,'published');
+
+-- REGISTRATIONS
+INSERT INTO event_registrations (user_id, event_id, status, note)
+VALUES
+(1,1,'confirmed','Note 1'),
+(2,2,'pending','Note 2'),
+(3,3,'confirmed','Note 3'),
+(4,4,'cancelled','Note 4'),
+(5,5,'confirmed','Note 5'),
+(6,6,'pending','Note 6'),
+(7,7,'confirmed','Note 7'),
+(8,8,'attended','Note 8'),
+(9,9,'confirmed','Note 9'),
+(10,10,'confirmed','Note 10');
+
+-- FAVORITES
+INSERT INTO event_favorites (user_id, event_id)
+VALUES
+(1,1),(1,2),(2,3),(3,4),(4,5),
+(5,6),(6,7),(7,8),(8,9),(9,10);
+
+-- COMMENTS
+INSERT INTO event_comments (event_id, user_id, rating, comment)
+VALUES
+(1,1,5,'Great event'),
+(2,2,4,'Nice'),
+(3,3,5,'Awesome'),
+(4,4,3,'Okay'),
+(5,5,5,'Loved it'),
+(6,6,4,'Good'),
+(7,7,5,'Perfect'),
+(8,8,3,'Not bad'),
+(9,9,4,'Enjoyed'),
+(10,10,5,'Excellent');
