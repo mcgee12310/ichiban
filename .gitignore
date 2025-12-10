@@ -1,0 +1,4 @@
+
+backend/build/resources/main/application.properties
+backend/event-app/src/main/resources/application.properties
+backend/event-app/pom.xml
