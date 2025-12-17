@@ -1,67 +1,70 @@
-import axios from 'axios';
+// src/api/authApi.js
+import axiosClient from "./axiosClient";
+import "./interceptor";
 
-const AUTH_REST_API_BASE_URL= 'http://localhost:8080/api/auth';
-
-const api = axios.create({
-  baseURL: AUTH_REST_API_BASE_URL,
-});
-
-// gọi API đăng nhập
+/**
+ * LOGIN
+ */
 export const loginAPICall = async (email, password) => {
   try {
-    const response = await axios.post("http://localhost:8080/api/auth/login", {
+    const response = await axiosClient.post("/auth/login", {
       email,
-      password
+      password,
     });
 
     const data = response.data;
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("email", data.email);
-    console.log("Login response data:", response.data);
-    
+
+    // Lưu token
+    if (data?.token) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("email", data.email);
+    }
+
+    console.log("Login response:", data);
     return data;
   } catch (error) {
-    console.error("Login thất bại", error);
+    console.error("Login thất bại", error.response?.data || error);
     throw error;
   }
-}
+};
 
-export const signupAPICall = async (email, password, fullName, birthdate, gender) => {
+/**
+ * SIGN UP
+ */
+export const signupAPICall = async (
+  email,
+  password,
+  fullName,
+  birthdate,
+  gender
+) => {
   try {
-    const response = await axios.post("http://localhost:8080/api/auth/signup", {
-      email: email,
-      password: password,
-      fullName: fullName,
-      birthdate: birthdate,
-      gender: gender
+    const response = await axiosClient.post("/auth/signup", {
+      email,
+      password,
+      fullName,
+      birthdate,
+      gender,
     });
 
-    // Kiểm tra response
-    if (response.data) {
-      return {
-        success: true,
-        data: response.data,
-        message: response.data.message || 'Registration successful'
-      };
-    }
-    
-    throw new Error('No response data received');
-    
+    return {
+      success: true,
+      data: response.data,
+      message: response.data?.message || "Registration successful",
+    };
   } catch (error) {
-    // Xử lý các loại lỗi khác nhau
     if (error.response) {
-      // Server trả về error response
-      const errorMessage = error.response.data?.message || 
-                          error.response.data?.error ||
-                          'サーバーエラーが発生しました';
-      
+      const errorMessage =
+        error.response.data?.message ||
+        error.response.data?.error ||
+        "サーバーエラーが発生しました";
       throw new Error(errorMessage);
     } else if (error.request) {
-      // Request được gửi nhưng không nhận được response
-      throw new Error('サーバーに接続できません。ネットワークを確認してください。');
+      throw new Error(
+        "サーバーに接続できません。ネットワークを確認してください。"
+      );
     } else {
-      // Lỗi khác
-      throw new Error(error.message || '予期しないエラーが発生しました');
+      throw new Error(error.message || "予期しないエラーが発生しました");
     }
   }
 };

@@ -1,52 +1,22 @@
-import axios from "axios";
+// src/api/eventApi.js
+import axiosClient from "./axiosClient";
+import "./interceptor"; // 👈 quan trọng (chạy interceptor)
 
-const BASE_URL = "http://localhost:8080/api"; 
-// nhớ thống nhất prefix /api nếu BE dùng
-
-const token = localStorage.getItem("token"); 
-
-const api = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    Authorization: `Bearer ${token}` // token lấy từ login
-  }
-});
-
-// ======================== GET ALL EVENTS ========================
 export const getAllEvents = async (page = 0, size = 10) => {
-  try {
-    const response = await api.post("/events/search", { page, size });
-    console.log("Get events response:", response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Get events error:", error);
-    throw error;
-  }
+  const res = await axiosClient.post("/events/search", { page, size });
+  return res.data;
 };
 
-// ======================== GET EVENT DETAIL ========================
 export const getEventDetail = async (id) => {
-  try {
-    const response = await api.get(`/events/${id}`);
-    console.log(response.data);
-    return response.data;
-  } catch (error) {
-    console.error("Get event detail error:", error.response?.data || error);
-    throw error;
-  }
+  const res = await axiosClient.get(`/events/${id}`);
+  return res.data;
 };
 
-// ======================== GET EVENT REVIEWS ========================
 export const getEventReviews = async (eventId, sortBy = "latest") => {
-  try {
-    const response = await api.get(`/events/${eventId}/reviews`, {
-      params: { sortBy }
-    });
-    return response.data;
-  } catch (error) {
-    console.error("Get event reviews error:", error.response?.data || error);
-    throw error;
-  }
+  const res = await axiosClient.get(`/events/${eventId}/reviews`, {
+    params: { sortBy },
+  });
+  return res.data;
 };
 
 // ======================== SUBMIT EVENT REVIEW ========================
