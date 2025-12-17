@@ -48,3 +48,17 @@ export const getEventReviews = async (eventId, sortBy = "latest") => {
     throw error;
   }
 };
+
+// ======================== SUBMIT EVENT REVIEW ========================
+export const submitEventReview = async (eventId, rating, comment) => {
+  try {
+    const response = await api.post(`/events/${eventId}/reviews`, {
+      rating,
+      comment
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Submit event review error:", error.response?.data || error);
+    throw error;
+  }
+};

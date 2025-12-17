@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Home, Search, Heart, Calendar, Menu, MapPin, Tag, Clock, ChevronLeft, ChevronRight, Share2, Star, ArrowLeft, Navigation } from 'lucide-react';
 import Header from '../components/header/Header';
-import { getEventDetail, getEventReviews } from '../../services/EventService'
+import { getEventDetail, getEventReviews, submitEventReview } from '../../services/EventService'
 import { formatDate, formatPrice } from "../../ultis/format";
 
 export default function PlaceDetailPage() {
@@ -14,6 +14,10 @@ export default function PlaceDetailPage() {
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
   const [reviews, setReviews] = useState([]);
+  const [rating, setRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [hoveredRating, setHoveredRating] = useState(0);
+  const [submitting, setSubmitting] = useState(false);
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % place.images.length);
@@ -38,6 +42,43 @@ export default function PlaceDetailPage() {
   const openInGoogleMaps = () => {
     const query = encodeURIComponent(place.address);
     window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    
+    if (rating === 0) {
+      alert('評価を選択してください');
+      return;
+    }
+
+    if (!comment.trim()) {
+      alert('コメントを入力してください');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      await submitEventReview(id, rating, comment);
+      
+      // Reset form
+      setRating(0);
+      setComment('');
+      setHoveredRating(0);
+      
+      // Refresh reviews
+      const reviewRes = await getEventReviews(id, "latest");
+      setReviews(reviewRes.reviews || []);
+      setAverageRating(reviewRes.averageRating);
+      setTotalReviews(reviewRes.totalReviews);
+      
+      alert('レビューを投稿しました！');
+    } catch (error) {
+      console.error("Submit review failed:", error);
+      alert('レビューの投稿に失敗しました。もう一度お試しください。');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   useEffect(() => {
@@ -184,6 +225,76 @@ export default function PlaceDetailPage() {
                 <Share2 size={20} />
                 シェアー
               </button>
+            </div>
+
+            {/* Review Form */}
+            <div className="bg-white rounded-2xl shadow-lg p-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Star className="text-yellow-500" />
+                レビューを書く
+              </h2>
+              
+              <form onSubmit={handleSubmitReview} className="space-y-4">
+                {/* Star Rating */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    評価 <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setRating(star)}
+                        onMouseEnter={() => setHoveredRating(star)}
+                        onMouseLeave={() => setHoveredRating(0)}
+                        className="transition-transform hover:scale-110 focus:outline-none"
+                      >
+                        <Star
+                          size={32}
+                          className={
+                            star <= (hoveredRating || rating)
+                              ? 'fill-yellow-400 text-yellow-400'
+                              : 'text-gray-300'
+                          }
+                        />
+                      </button>
+                    ))}
+                    {rating > 0 && (
+                      <span className="ml-2 text-sm text-gray-600 font-medium">
+                        {rating} / 5
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Comment Textarea */}
+                <div>
+                  <label htmlFor="comment" className="block text-sm font-medium text-gray-700 mb-2">
+                    コメント <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    id="comment"
+                    value={comment}
+                    onChange={(e) => setComment(e.target.value)}
+                    rows={5}
+                    placeholder="このイベントについての感想を書いてください..."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none transition-all resize-none text-gray-700"
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    {comment.length} 文字
+                  </p>
+                </div>
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={submitting || rating === 0 || !comment.trim()}
+                  className="w-full bg-gradient-to-r from-red-500 to-pink-500 text-white py-3.5 px-6 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:from-red-600 hover:to-pink-600 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-lg"
+                >
+                  {submitting ? '投稿中...' : 'レビューを投稿'}
+                </button>
+              </form>
             </div>
           </div>
 
