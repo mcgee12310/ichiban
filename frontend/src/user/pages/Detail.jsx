@@ -1,45 +1,19 @@
-import { useState } from 'react';
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { Home, Search, Heart, Calendar, Menu, MapPin, Tag, Clock, ChevronLeft, ChevronRight, Share2, Star, ArrowLeft, Navigation } from 'lucide-react';
+import Header from '../components/header/Header';
+import { getEventDetail, getEventReviews } from '../../services/EventService'
+import { formatDate, formatPrice } from "../../ultis/format";
 
 export default function PlaceDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const { id } = useParams();
 
-  // Mock data
-  const place = {
-    id: 1,
-    name: '上野公園',
-    location: '東京・公園・無料',
-    address: '東京都台東区上野公園5-20',
-    categories: ['公園', '家族向け', '無料'],
-    openingHours: '24時間営業',
-    description: '広大な敷地を持つ都市公園。動物園、美術館、博物館などが集まり、家族で一日中楽しめるスポットです。春には桜の名所として有名で、多くの観光客が訪れます。自然豊かな環境で、子供から大人まで楽しめる施設が充実しています。',
-    images: [
-      'https://images.unsplash.com/photo-1590559899731-a382839e5549?w=800',
-      'https://images.pexels.com/photos/31139933/pexels-photo-31139933.jpeg?w=800',
-      'https://images.pexels.com/photos/34991505/pexels-photo-34991505.jpeg?w=800'
-    ]
-  };
-
-  const reviews = [
-    {
-      userName: '田中太郎',
-      rating: 5,
-      date: '2024/12/01',
-      comment: '家族で訪れました。子供たちが大喜びで、一日中楽しめました！桜の季節にまた来たいです。'
-    },
-    {
-      userName: '佐藤花子',
-      rating: 4,
-      date: '2024/11/28',
-      comment: '広くて気持ちいい公園です。美術館も近くにあり、文化的な休日を過ごせました。'
-    },
-    {
-      userName: '山田次郎',
-      rating: 5,
-      date: '2024/11/25',
-      comment: '動物園も含めて、家族連れには最高のスポットです。一日では回りきれないほど見どころがあります。'
-    }
-  ];
+  const [place, setPlace] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [reviews, setReviews] = useState([]);
 
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % place.images.length);
@@ -66,47 +40,39 @@ export default function PlaceDetailPage() {
     window.open(`https://www.google.com/maps/search/?api=1&query=${query}`, '_blank');
   };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+
+        const eventDetail = await getEventDetail(id);
+        setPlace(eventDetail);
+
+        const reviewRes = await getEventReviews(id, "latest");
+        setReviews(reviewRes.reviews || []);
+        setAverageRating(reviewRes.averageRating);
+        setTotalReviews(reviewRes.totalReviews);
+      } catch (error) {
+        console.error("Load event detail failed:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) fetchData();
+  }, [id]);
+
+  if (loading) {
+    return <div className="p-10 text-center">Loading...</div>;
+  }
+
+  if (!place) {
+    return <div className="p-10 text-center">No data</div>;
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
-      {/* Header */}
-      <header className="bg-white shadow-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">HW</span>
-                </div>
-                <span className="text-xl font-bold text-gray-900">ハッピーウィークエンド</span>
-              </div>
-              <span className="text-sm text-gray-500 hidden sm:block">週末の冒険</span>
-            </div>
-            
-            <nav className="hidden md:flex items-center gap-6">
-              <button className="flex items-center gap-2 text-gray-700 hover:text-red-500 transition-colors">
-                <Home size={20} />
-                <span>ホーム</span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-700 hover:text-red-500 transition-colors">
-                <Search size={20} />
-                <span>検索</span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-700 hover:text-red-500 transition-colors">
-                <Heart size={20} />
-                <span>お気に入り</span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-700 hover:text-red-500 transition-colors">
-                <Calendar size={20} />
-                <span>イベント</span>
-              </button>
-            </nav>
-            
-            <button className="md:hidden p-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-              <Menu size={24} />
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
@@ -125,12 +91,12 @@ export default function PlaceDetailPage() {
             <div className="relative bg-gray-200 rounded-2xl overflow-hidden shadow-lg group">
               <div className="aspect-video w-full">
                 <img
-                  src={place.images[currentImageIndex]}
+                  src={place?.images?.[currentImageIndex] || "https://via.placeholder.com/800x450"}
                   alt="Place"
                   className="w-full h-full object-cover"
                 />
               </div>
-              
+
               {place.images.length > 1 && (
                 <>
                   <button
@@ -145,15 +111,14 @@ export default function PlaceDetailPage() {
                   >
                     <ChevronRight size={24} />
                   </button>
-                  
+
                   <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                     {place.images.map((_, index) => (
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
-                        className={`h-2 rounded-full transition-all ${
-                          index === currentImageIndex ? 'bg-white w-8' : 'bg-white/60 w-2'
-                        }`}
+                        className={`h-2 rounded-full transition-all ${index === currentImageIndex ? 'bg-white w-8' : 'bg-white/60 w-2'
+                          }`}
                       />
                     ))}
                   </div>
@@ -165,17 +130,17 @@ export default function PlaceDetailPage() {
             <div className="bg-white rounded-2xl shadow-lg p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{place.name}</h1>
+                  <h1 className="text-3xl font-bold text-gray-900 mb-2">{place.title}</h1>
                   <div className="flex items-center gap-2 text-gray-600 mb-3">
                     <MapPin size={18} className="text-red-500" />
-                    <span>{place.location}</span>
+                    <span>{place.address}, {place.district}, {place.city}</span>
                   </div>
                 </div>
                 <button className="bg-red-50 hover:bg-red-100 text-red-500 p-3 rounded-full transition-all hover:scale-110">
                   <Heart size={24} />
                 </button>
               </div>
-              
+
               <div className="flex flex-wrap gap-2 mb-4">
                 {place.categories.map((category, index) => (
                   <span
@@ -187,12 +152,19 @@ export default function PlaceDetailPage() {
                   </span>
                 ))}
               </div>
-              
+
               <div className="flex items-center gap-2 text-gray-600 mb-4 bg-blue-50 p-3 rounded-lg">
                 <Clock size={18} className="text-blue-500" />
-                <span className="font-medium">{place.openingHours}</span>
+                <span className="font-medium">{formatDate(place.startDate)} - {formatDate(place.endDate)}</span>
               </div>
-              
+
+              <div className="flex items-center gap-2 text-gray-600 mb-4 bg-green-50 p-3 rounded-lg">
+                <Tag size={18} className="text-green-600" />
+                <span className="font-semibold text-green-700">
+                  {formatPrice(place.price)}
+                </span>
+              </div>
+
               <p className="text-gray-700 leading-relaxed text-lg">{place.description}</p>
             </div>
 
@@ -223,7 +195,7 @@ export default function PlaceDetailPage() {
                 <MapPin className="text-red-500" />
                 場所
               </h2>
-              
+
               <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-8 mb-4 flex items-center justify-center min-h-[200px] border-2 border-dashed border-blue-200">
                 <div className="text-center">
                   <MapPin size={48} className="text-blue-400 mx-auto mb-3" />
@@ -239,19 +211,30 @@ export default function PlaceDetailPage() {
                   </button>
                 </div>
               </div>
-              
+
               <div className="bg-gray-50 p-4 rounded-lg">
-                <p className="text-gray-700 font-medium">{place.address}</p>
+                <p className="text-gray-700 font-medium">{place.address}, {place.district}, {place.city}</p>
               </div>
             </div>
 
             {/* Review Section */}
             <div className="bg-white rounded-2xl shadow-lg p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
-                <Star className="text-yellow-500 fill-yellow-500" />
-                レビュー
-              </h2>
-              
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+                  レビュー
+                </h2>
+
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-1">
+                    <Star className="text-yellow-500 fill-yellow-500" size={16} />
+                    <span className="font-semibold text-gray-900">
+                      {averageRating}
+                    </span>
+                  </div>
+                  <span>({totalReviews} 件)</span>
+                </div>
+              </div>
+
               <div className="space-y-4">
                 {reviews.map((review, index) => (
                   <div key={index} className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-5 hover:shadow-md transition-all border border-gray-100">

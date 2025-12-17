@@ -1,8 +1,15 @@
 package com.example.event.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "events")
@@ -28,6 +35,12 @@ public class Event {
     @ManyToOne
     @JoinColumn(name = "location_id", foreignKey = @ForeignKey(name = "fk_events_location"))
     private EventLocation location;
+
+    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY)
+    private List<EventImage> images;
+
+    @OneToMany(mappedBy = "event")
+    private List<EventComment> reviews;
 
     @Column(name = "start_datetime", nullable = false)
     private OffsetDateTime startDatetime;
@@ -80,4 +93,11 @@ public class Event {
 
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public List<EventImage> getImages() {
+        return images;
+    }
+    public void setImages(List<EventImage> images) {
+        this.images = images;
+    }
 }

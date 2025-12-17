@@ -31,7 +31,7 @@ export default function EventsSearch() {
 
   const fetchData = async () => {
     const data = await getAllEvents();
-    console.log("Fetched events data:", data.events);
+    console.log("取得したイベントデータ:", data.events); // 翻訳: Fetched events data:
     setEvents(data.events);
   };
 
@@ -41,7 +41,7 @@ export default function EventsSearch() {
 
   const handleSearch = () => {
     // Có thể không cần làm gì nếu filters đã được set
-    console.log("Tìm kiếm với filters:", filters);
+    console.log("以下のフィルターで検索:", filters); // 翻訳: Tìm kiếm với filters:
   };
 
   const filtered = useMemo(() => {
@@ -56,7 +56,7 @@ export default function EventsSearch() {
       }
 
       if (filters.maxPrice != null && p.price > filters.maxPrice) return false;
-      
+
       return true;
     }).sort((a, b) => {
       switch (filters.sortOption) {
@@ -93,8 +93,8 @@ export default function EventsSearch() {
           onSearch={handleSearch}
         />
         <div className="mb-2 text-sm text-gray-600">
-          Địa điểm hiện tại: {userLocation.city} - {userLocation.district}
-        </div>
+          現在の場所: {userLocation.city} - {userLocation.district}
+        </div> {/* 翻訳: Địa điểm hiện tại: */}
         {paginated.map(place => (
           <EventCard key={place.id} place={place} />
         ))}

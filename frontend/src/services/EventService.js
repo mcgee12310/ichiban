@@ -23,3 +23,28 @@ export const getAllEvents = async (page = 0, size = 10) => {
     throw error;
   }
 };
+
+// ======================== GET EVENT DETAIL ========================
+export const getEventDetail = async (id) => {
+  try {
+    const response = await api.get(`/events/${id}`);
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Get event detail error:", error.response?.data || error);
+    throw error;
+  }
+};
+
+// ======================== GET EVENT REVIEWS ========================
+export const getEventReviews = async (eventId, sortBy = "latest") => {
+  try {
+    const response = await api.get(`/events/${eventId}/reviews`, {
+      params: { sortBy }
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Get event reviews error:", error.response?.data || error);
+    throw error;
+  }
+};

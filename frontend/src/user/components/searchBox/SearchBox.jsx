@@ -35,24 +35,28 @@ function SearchBox({ filters, setFilters, onSearch }) {
 
   return (
     <div className={styles.box}>
-        <h2 className={styles.header}>Tìm kiếm sự kiện</h2>
-        
+      {/* 翻訳: Tìm kiếm sự kiện -> イベントを検索 */}
+      <h2 className={styles.header}>イベントを検索</h2> 
+
       {/* Hàng 1 */}
       <div className={styles.row}>
         <input
           value={keyword}
           onChange={(e) => setKeyword(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && apply()}
-          placeholder="Nhập từ khóa..."
+          // 翻訳: Nhập từ khóa... -> キーワードを入力...
+          placeholder="キーワードを入力..." 
           className={styles.input}
         />
 
         <button onClick={apply} className={styles.buttonPrimary}>
-          Tìm
+          {/* 翻訳: Tìm -> 検索 */}
+          検索
         </button>
 
         <button onClick={reset} className={styles.buttonSecondary}>
-          Reset
+          {/* 翻訳: Reset -> リセット */}
+          リセット
         </button>
       </div>
 
@@ -60,45 +64,58 @@ function SearchBox({ filters, setFilters, onSearch }) {
       <div className={styles.grid}>
         {/* Range */}
         <div className={styles.field}>
-          <label>Khoảng cách</label>
+          {/* 翻訳: Khoảng cách -> 範囲 */}
+          <label>範囲</label>
           <select
             value={rangeOption}
             onChange={(e) => setRangeOption(e.target.value)}
             className={styles.input}
           >
-            <option value="district">Cùng quận</option>
-            <option value="city">Cùng thành phố</option>
-            <option value="all">Không lọc</option>
+            {/* 翻訳: Cùng quận -> 同じ区内 */}
+            <option value="district">同じ区内</option>
+            {/* 翻訳: Cùng thành phố -> 同じ市内 */}
+            <option value="city">同じ市内</option>
+            {/* 翻訳: Không lọc -> フィルターなし */}
+            <option value="all">フィルターなし</option>
           </select>
         </div>
 
         {/* Sort */}
         <div className={styles.field}>
-          <label>Sắp xếp</label>
+          {/* 翻訳: Sắp xếp -> 並び替え */}
+          <label>並び替え</label>
           <select
             value={sortOption}
             onChange={(e) => setSortOption(e.target.value)}
             className={styles.input}
           >
-            <option value="none">Không sắp xếp</option>
-            <option value="ratingAsc">Rating thấp → cao</option>
-            <option value="ratingDesc">Rating cao → thấp</option>
-            <option value="priceAsc">Giá thấp → cao</option>
-            <option value="priceDesc">Giá cao → thấp</option>
-            <option value="priceFreeFirst">Miễn phí trước</option>
+            {/* 翻訳: Không sắp xếp -> 並び替えなし */}
+            <option value="none">並び替えなし</option>
+            {/* 翻訳: Rating thấp → cao -> 評価 低い順 */}
+            <option value="ratingAsc">評価 低い順</option>
+            {/* 翻訳: Rating cao → thấp -> 評価 高い順 */}
+            <option value="ratingDesc">評価 高い順</option>
+            {/* 翻訳: Giá thấp → cao -> 価格 低い順 */}
+            <option value="priceAsc">価格 低い順</option>
+            {/* 翻訳: Giá cao → thấp -> 価格 高い順 */}
+            <option value="priceDesc">価格 高い順</option>
+            {/* 翻訳: Miễn phí trước -> 無料を優先 */}
+            <option value="priceFreeFirst">無料を優先</option>
           </select>
         </div>
 
         {/* Max Price */}
         <div className={styles.field}>
-          <label>Giá tối đa</label>
+          {/* 翻訳: Giá tối đa -> 最大価格 */}
+          <label>最大価格</label>
           <input
             type="number"
             min={0}
             value={maxPrice}
             onChange={(e) => setMaxPrice(Number(e.target.value))}
             className={styles.input}
-            placeholder="Giá tối đa"
+            // 翻訳: Giá tối đa -> 最大価格
+            placeholder="最大価格"
           />
         </div>
       </div>

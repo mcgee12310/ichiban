@@ -11,7 +11,7 @@ function App() {
       <Route path="/" element={<HomePage/>}/>
       <Route path="/auth" element={<Auth/>}/>
       <Route path="/events/search" element={<EventsSearch/>}/>
-      <Route path="/detail" element={<PlaceDetailPage/>}/>
+      <Route path="/events/:id" element={<PlaceDetailPage/>}/>
     </Routes>
   )
 }

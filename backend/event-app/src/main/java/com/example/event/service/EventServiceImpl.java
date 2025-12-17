@@ -1,12 +1,11 @@
 package com.example.event.service;
 
-import com.example.event.dto.response.EventSearchResponse;
-import com.example.event.dto.response.EventSearchResponseItem;
-import com.example.event.dto.response.EventReviewResponse;
-import com.example.event.dto.response.EventReviewResponseItem;
+import com.example.event.dto.response.*;
 import com.example.event.model.Event;
 import com.example.event.model.EventComment;
+import com.example.event.model.EventImage;
 import com.example.event.repository.EventCommentRepository;
+import com.example.event.repository.EventImageRepository;
 import com.example.event.repository.EventRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,10 +22,12 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
     private final EventCommentRepository eventCommentRepository;
+    private final EventImageRepository eventImageRepository;
 
-    public EventServiceImpl(EventRepository eventRepository, EventCommentRepository eventCommentRepository) {
+    public EventServiceImpl(EventRepository eventRepository, EventCommentRepository eventCommentRepository, EventImageRepository eventImageRepository) {
         this.eventRepository = eventRepository;
         this.eventCommentRepository = eventCommentRepository;
+        this.eventImageRepository = eventImageRepository;
     }
 
     @Override
@@ -77,6 +78,50 @@ public class EventServiceImpl implements EventService {
         return response;
     }
 
+    @Override
+    public EventDetailResponse getEventDetail(Long eventId) {
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Event not found"));
+
+        EventDetailResponse res = new EventDetailResponse();
+
+        res.setId(event.getId());
+        res.setTitle(event.getTitle());
+        res.setDescription(event.getDescription());
+
+        // ===== CATEGORY (1 → List) =====
+        if (event.getCategory() != null) {
+            res.setCategories(List.of(event.getCategory().getName()));
+        }
+
+        // ===== LOCATION =====
+        if (event.getLocation() != null) {
+            res.setCity(event.getLocation().getCity());
+            res.setDistrict(event.getLocation().getDistrict());
+            res.setAddress(event.getLocation().getAddress());
+        }
+
+        // ===== TIME =====
+        res.setStartDate(event.getStartDatetime());
+        res.setEndDate(event.getEndDatetime());
+
+        // ===== PRICE =====
+        res.setPrice(event.getPrice());
+
+        // ===== IMAGES =====
+        if (event.getImages() != null) {
+            res.setImages(
+                    event.getImages().stream()
+                            .map(EventImage::getImageUrl)
+                            .toList()
+            );
+        }
+
+        return res;
+    }
+
     private EventSearchResponseItem mapToResponseItem(Event event) {
         EventSearchResponseItem item = new EventSearchResponseItem();
         item.setId(event.getId());
@@ -88,12 +133,17 @@ public class EventServiceImpl implements EventService {
         item.setEndDate(event.getEndDatetime());
         item.setShortDescription(event.getDescription());
         item.setPrice(event.getPrice());
-        double randomRating = Math.round(
-                (ThreadLocalRandom.current().nextDouble(1.0, 5.0) * 10)
-        ) / 10.0;
+        // ✅ LẤY ẢNH ĐẦU TIÊN
+        String thumbnail = null;
+        if (event.getImages() != null && !event.getImages().isEmpty()) {
+            thumbnail = event.getImages().get(0).getImageUrl();
+        }
+        item.setImage(thumbnail);
 
-        item.setRating(randomRating);
-        item.setImage(null);  // optional, add image URL field in Event if needed
+        // ✅ TÍNH AVERAGE RATING
+        Double avg = eventCommentRepository
+                .findAverageRatingByEventId(event.getId());
+        item.setRating(avg != null ? avg : 0.0);
         return item;
     }
 
