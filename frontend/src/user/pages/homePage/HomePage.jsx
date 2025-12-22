@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../components/header/Header";
 import { getAllEvents } from "../../../services/EventService";
-import { Search, Heart, TrendingUp, Star } from "lucide-react";
+import { Search, Heart, TrendingUp, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDate } from "../../../ultis/format";
+import { useNavigate } from 'react-router-dom';
 
 export default function HomePage() {
+  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
@@ -37,9 +39,11 @@ export default function HomePage() {
   const osusumeEvents = events.slice(3, 6); // 3 events instead of 2
   const hotTrendEvents = events.slice(6, 9); // 3 events
 
+  // Handler khi nhấn nút Tìm kiếm
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log("Searching for:", searchQuery);
+    // Chuyển sang trang search với query
+    navigate(`/events/search?q=${encodeURIComponent(searchQuery)}`);
   };
 
   return (
@@ -56,14 +60,14 @@ export default function HomePage() {
             <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-pink-200">
               <div className="flex items-center gap-3 mb-2">
                 <Search className="w-6 h-6 text-pink-600" />
-                <h2 className="text-2xl font-bold text-gray-800">Searching for place</h2>
+                <h2 className="text-2xl font-bold text-gray-800">イベント検索</h2>
               </div>
-              <p className="text-gray-600 mb-6 text-sm">Mở tả cái gì đó</p>
+              <p className="text-gray-600 mb-6 text-sm">キーワードでイベントを検索できます</p>
               
-              <form onSubmit={handleSearch} className="flex gap-3">
+              <form onSubmit={handleSearch} className="flex gap-2">
                 <input
                   type="text"
-                  placeholder="Mô tả cái gì đó"
+                  placeholder="イベント名、場所など..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="flex-1 px-5 py-3 rounded-full border-2 border-pink-200 bg-white/90 focus:outline-none focus:border-pink-400 transition-all text-gray-700 placeholder-gray-400"
@@ -72,27 +76,32 @@ export default function HomePage() {
                   type="submit"
                   className="px-8 py-3 bg-gradient-to-r from-pink-400 to-pink-500 text-white rounded-full font-medium hover:from-pink-500 hover:to-pink-600 transition-all shadow-md hover:shadow-lg"
                 >
-                  Tìm kiếm
+                  検索
                 </button>
               </form>
+            </div>
+
+            {/* CALENDAR */}
+            <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-pink-200">
+              <CalendarComponent events={events} />
             </div>
 
             {/* FAVOURITE */}
             <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-pink-200">
               <div className="flex items-center gap-3 mb-6">
                 <Heart className="w-6 h-6 text-pink-600 fill-pink-600" />
-                <h2 className="text-2xl font-bold text-gray-800">Favourite</h2>
+                <h2 className="text-2xl font-bold text-gray-800">お気に入り</h2>
               </div>
               
               <div className="space-y-4">
                 {loading ? (
-                  <div className="text-center py-8 text-gray-500">Đang tải...</div>
+                  <div className="text-center py-8 text-gray-500">読み込み中...</div>
                 ) : favouriteEvents.length > 0 ? (
                   favouriteEvents.map((event, index) => (
                     <EventItemCard key={index} event={event} />
                   ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500">Không có sự kiện yêu thích</div>
+                  <div className="text-center py-8 text-gray-500">お気に入りがありません</div>
                 )}
               </div>
             </div>
@@ -105,18 +114,18 @@ export default function HomePage() {
             <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-pink-200">
               <div className="flex items-center gap-3 mb-6">
                 <Star className="w-6 h-6 text-pink-600 fill-pink-600" />
-                <h2 className="text-2xl font-bold text-gray-800">Osusume</h2>
+                <h2 className="text-2xl font-bold text-gray-800">おすすめ</h2>
               </div>
               
               <div className="space-y-4">
                 {loading ? (
-                  <div className="text-center py-8 text-gray-500">Đang tải...</div>
+                  <div className="text-center py-8 text-gray-500">読み込み中...</div>
                 ) : osusumeEvents.length > 0 ? (
                   osusumeEvents.map((event, index) => (
                     <EventItemCard key={index} event={event} />
                   ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500">Không có sự kiện</div>
+                  <div className="text-center py-8 text-gray-500">イベントがありません</div>
                 )}
               </div>
             </div>
@@ -125,24 +134,166 @@ export default function HomePage() {
             <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 shadow-lg border border-pink-200">
               <div className="flex items-center gap-3 mb-6">
                 <TrendingUp className="w-6 h-6 text-pink-600" />
-                <h2 className="text-2xl font-bold text-gray-800">Hot trend</h2>
+                <h2 className="text-2xl font-bold text-gray-800">人気のイベント</h2>
               </div>
               
               <div className="space-y-4">
                 {loading ? (
-                  <div className="text-center py-8 text-gray-500">Đang tải...</div>
+                  <div className="text-center py-8 text-gray-500">読み込み中...</div>
                 ) : hotTrendEvents.length > 0 ? (
                   hotTrendEvents.map((event, index) => (
                     <EventItemCard key={index} event={event} />
                   ))
                 ) : (
-                  <div className="text-center py-8 text-gray-500">Không có sự kiện</div>
+                  <div className="text-center py-8 text-gray-500">イベントがありません</div>
                 )}
               </div>
             </div>
           </div>
 
         </div>
+      </div>
+    </div>
+  );
+}
+
+// Calendar Component
+function CalendarComponent({ events = [] }) {
+  const [currentDate, setCurrentDate] = useState(new Date());
+  
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const daysOfWeek = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+  
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+  
+  // Count events for each day
+  const getEventCountForDay = (day) => {
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return events.filter(event => {
+      if (!event.startDatetime) return false;
+      const eventDate = new Date(event.startDatetime);
+      const eventDateStr = `${eventDate.getFullYear()}-${String(eventDate.getMonth() + 1).padStart(2, '0')}-${String(eventDate.getDate()).padStart(2, '0')}`;
+      return eventDateStr === dateStr;
+    }).length;
+  };
+  
+  const previousMonth = () => {
+    setCurrentDate(new Date(year, month - 1, 1));
+  };
+  
+  const nextMonth = () => {
+    setCurrentDate(new Date(year, month + 1, 1));
+  };
+  
+  const renderDays = () => {
+    const days = [];
+    
+    // Previous month's days
+    const prevMonthDays = new Date(year, month, 0).getDate();
+    for (let i = firstDayOfMonth - 1; i >= 0; i--) {
+      days.push(
+        <div key={`prev-${i}`} className="text-center py-3 text-gray-300">
+          {prevMonthDays - i}
+        </div>
+      );
+    }
+    
+    // Current month's days
+    for (let day = 1; day <= daysInMonth; day++) {
+      const isToday = 
+        day === today.getDate() && 
+        month === today.getMonth() && 
+        year === today.getFullYear();
+      
+      const eventCount = getEventCountForDay(day);
+      
+      // Determine background color based on event count
+      let bgClass = "hover:bg-pink-50 text-gray-700";
+      if (isToday) {
+        bgClass = "bg-gray-900 text-white font-semibold";
+      } else if (eventCount >= 3) {
+        bgClass = "bg-pink-400 text-white font-medium hover:bg-pink-500";
+      } else if (eventCount === 2) {
+        bgClass = "bg-pink-300 text-white font-medium hover:bg-pink-400";
+      } else if (eventCount === 1) {
+        bgClass = "bg-pink-200 text-gray-700 hover:bg-pink-300";
+      }
+      
+      days.push(
+        <button
+          key={day}
+          className={`text-center py-3 rounded-xl transition-all ${bgClass}`}
+        >
+          {day}
+        </button>
+      );
+    }
+    
+    return days;
+  };
+  
+  return (
+    <div className="max-w-md mx-auto">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <button
+          onClick={previousMonth}
+          className="p-2 hover:bg-pink-50 rounded-lg transition-colors"
+        >
+          <ChevronLeft className="w-5 h-5 text-gray-700" />
+        </button>
+        
+        <div className="flex gap-3">
+          <select
+            value={month}
+            onChange={(e) => setCurrentDate(new Date(year, parseInt(e.target.value), 1))}
+            className="px-4 py-2 border border-gray-300 rounded-xl bg-white text-gray-700 focus:outline-none focus:border-pink-400"
+          >
+            {monthNames.map((name, index) => (
+              <option key={index} value={index}>
+                {name}
+              </option>
+            ))}
+          </select>
+          
+          <select
+            value={year}
+            onChange={(e) => setCurrentDate(new Date(parseInt(e.target.value), month, 1))}
+            className="px-4 py-2 border border-gray-300 rounded-xl bg-white text-gray-700 focus:outline-none focus:border-pink-400"
+          >
+            {Array.from({ length: 10 }, (_, i) => year - 5 + i).map((y) => (
+              <option key={y} value={y}>
+                {y}
+              </option>
+            ))}
+          </select>
+        </div>
+        
+        <button
+          onClick={nextMonth}
+          className="p-2 hover:bg-pink-50 rounded-lg transition-colors"
+        >
+          <ChevronRight className="w-5 h-5 text-gray-700" />
+        </button>
+      </div>
+      
+      {/* Days of week */}
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {daysOfWeek.map((day) => (
+          <div key={day} className="text-center text-sm font-medium text-gray-500 py-2">
+            {day}
+          </div>
+        ))}
+      </div>
+      
+      {/* Calendar days */}
+      <div className="grid grid-cols-7 gap-1">
+        {renderDays()}
       </div>
     </div>
   );
@@ -164,13 +315,13 @@ function EventItemCard({ event, compact = false }) {
       {/* Content */}
       <div className="flex-1 min-w-0">
         <h3 className="font-bold text-gray-800 mb-1 truncate text-lg">
-          {event.title || "Text"}
+          {event.title || "イベント名"}
         </h3>
         {!compact && (
-          <p className="text-xs text-gray-500 mb-1">small text</p>
+          <p className="text-xs text-gray-500 mb-1">{event.city || "場所"} • {event.district || "地区"}</p>
         )}
         <p className="text-sm text-gray-600 truncate">
-          {event.shortDescription || "describes"}
+          {event.shortDescription || "イベントの説明"}
         </p>
       </div>
       

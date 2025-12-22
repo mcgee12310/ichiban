@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
+import { useSearchParams } from 'react-router-dom';
 import styles from "./EventsSearch.module.css"; // CSS Module
 import Header from "../../components/header/Header";
 import SearchBox from "../../components/searchBox/SearchBox";
@@ -11,11 +12,14 @@ const userCity = "Ha Noi"
 
 /* ========================= MAIN PAGE ========================= */
 export default function EventsSearch() {
+  const [searchParams] = useSearchParams();
+  const initialQuery = searchParams.get('q') || '';
+  
   const [events, setEvents] = useState([]);
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
   const [filters, setFilters] = useState({
-    keyword: "",
+    keyword: initialQuery,
     rangeOption: "all",
     sortOption: "none",
     maxPrice: 500000,
