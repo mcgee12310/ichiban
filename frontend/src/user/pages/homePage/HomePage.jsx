@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../components/header/Header";
 import { getAllEvents } from "../../../services/EventService";
+import { getFavoriteEvents } from "../../../services/FavoriteService";
 import { Search, Heart, TrendingUp, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDate } from "../../../ultis/format";
 import { useNavigate } from 'react-router-dom';
@@ -8,11 +9,14 @@ import { useNavigate } from 'react-router-dom';
 export default function HomePage() {
   const navigate = useNavigate();
   const [events, setEvents] = useState([]);
+  const [favouriteEvents, setFavouriteEvents] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [favoritesLoading, setFavoritesLoading] = useState(true);
 
   useEffect(() => {
     fetchEvents();
+    fetchFavorites();
   }, []);
 
   const fetchEvents = async () => {
@@ -27,6 +31,23 @@ export default function HomePage() {
     }
   };
 
+  const fetchFavorites = async () => {
+    try {
+      setFavoritesLoading(true);
+      const token = localStorage.getItem("token");
+      if (token) {
+        const favorites = await getFavoriteEvents();
+        setFavouriteEvents(favorites || []);
+      }
+    } catch (error) {
+      console.error("Error fetching favorites:", error);
+      // Nếu không có token hoặc lỗi, để empty array
+      setFavouriteEvents([]);
+    } finally {
+      setFavoritesLoading(false);
+    }
+  };
+
   // Filter events by search query
   const filteredEvents = events.filter(event =>
     event.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -34,8 +55,7 @@ export default function HomePage() {
     event.city?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Get random events for different sections
-  const favouriteEvents = events.slice(0, 3);
+  // Get random events for different sections (không dùng favouriteEvents từ slice nữa)
   const osusumeEvents = events.slice(3, 6); // 3 events instead of 2
   const hotTrendEvents = events.slice(6, 9); // 3 events
 
@@ -94,7 +114,7 @@ export default function HomePage() {
               </div>
               
               <div className="space-y-4">
-                {loading ? (
+                {favoritesLoading ? (
                   <div className="text-center py-8 text-gray-500">読み込み中...</div>
                 ) : favouriteEvents.length > 0 ? (
                   favouriteEvents.map((event, index) => (
