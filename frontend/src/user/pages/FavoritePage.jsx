@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import styles from "./FavoritePage.module.css";
 import Header from "../components/header/Header";
 import EventCard from "../components/eventCard/EventCard";
-import { getFavorites } from "../../services/FavoriteService";
+import { getFavorite } from "../../services/FavoriteService";
 
 export default function FavoritePage() {
   const navigate = useNavigate();
@@ -18,7 +18,7 @@ export default function FavoritePage() {
   const fetchFavorites = async () => {
     try {
       setLoading(true);
-      const data = await getFavorites();
+      const data = await getFavorite();
       console.log("Fetched favorites data:", data);
       // API returns array directly or wrapped in favorites property
       const favoritesArray = Array.isArray(data) ? data : (data.favorites || []);
@@ -37,7 +37,7 @@ export default function FavoritePage() {
   };
 
   const handleCardClick = (eventId) => {
-    navigate(`/event/${eventId}`);
+    navigate(`/events/${eventId}`);
   };
 
   const handleRemoveFavorite = () => {

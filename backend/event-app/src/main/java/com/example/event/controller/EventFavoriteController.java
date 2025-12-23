@@ -39,9 +39,9 @@ public class EventFavoriteController {
         boolean wasCreated = favoriteService.addFavorite(eventId);
 
         if (wasCreated) {
-            return new ResponseEntity<>(HttpStatus.CREATED); 
+            return new ResponseEntity<>(HttpStatus.CREATED);
         } else {
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
@@ -52,6 +52,6 @@ public class EventFavoriteController {
     @DeleteMapping("/{eventId}")
     public ResponseEntity<Void> removeFavorite(@PathVariable Long eventId) {
         favoriteService.removeFavorite(eventId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT); 
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

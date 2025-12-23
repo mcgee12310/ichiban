@@ -43,19 +43,19 @@ public class EventFavoriteService {
             throw new RuntimeException("You must be logged in to view favorites.");
         }
 
-        List<EventSummaryProjection> projections = 
-            favoriteRepository.findFavoriteEventsSummaryByUserId(userId);
-        
+        List<EventSummaryProjection> projections =
+                favoriteRepository.findFavoriteEventsSummaryByUserId(userId);
+
         return projections.stream()
-            .map(p -> new EventSummaryResponse(
-                p.getId(),
-                p.getTitle(),
-                p.getStartDatetime(),
-                p.getLocationCity(),
-                p.getMainImageUrl(),
-                p.getPrice()
-            ))
-            .collect(Collectors.toList());
+                .map(p -> new EventSummaryResponse(
+                        p.getId(),
+                        p.getTitle(),
+                        p.getStartDatetime(),
+                        p.getLocationCity(),
+                        p.getMainImageUrl(),
+                        p.getPrice()
+                ))
+                .collect(Collectors.toList());
     }
 
     /**
@@ -73,23 +73,23 @@ public class EventFavoriteService {
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found"));
-        
+
         // 2. Check if already favorited
         if (favoriteRepository.findById_UserIdAndId_EventId(userId, eventId).isPresent()) {
             return false; // Already existed
         }
-        
+
         // 3. Save new favorite
         EventFavoriteId id = new EventFavoriteId(userId, eventId);
         EventFavorite favorite = new EventFavorite(
-            id, 
-            user, 
-            event, 
-            OffsetDateTime.now()
+                id,
+                user,
+                event,
+                OffsetDateTime.now()
         );
-        
+
         favoriteRepository.save(favorite);
-        return true; 
+        return true;
     }
 
     /**

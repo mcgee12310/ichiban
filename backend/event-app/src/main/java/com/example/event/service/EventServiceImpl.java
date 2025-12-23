@@ -1,11 +1,12 @@
 package com.example.event.service;
 
-import com.example.event.dto.response.*;
+import com.example.event.dto.response.EventSearchResponse;
+import com.example.event.dto.response.EventSearchResponseItem;
+import com.example.event.dto.response.EventReviewResponse;
+import com.example.event.dto.response.EventReviewResponseItem;
 import com.example.event.model.Event;
 import com.example.event.model.EventComment;
-import com.example.event.model.EventImage;
 import com.example.event.repository.EventCommentRepository;
-import com.example.event.repository.EventImageRepository;
 import com.example.event.repository.EventRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,12 +23,10 @@ public class EventServiceImpl implements EventService {
 
     private final EventRepository eventRepository;
     private final EventCommentRepository eventCommentRepository;
-    private final EventImageRepository eventImageRepository;
 
-    public EventServiceImpl(EventRepository eventRepository, EventCommentRepository eventCommentRepository, EventImageRepository eventImageRepository) {
+    public EventServiceImpl(EventRepository eventRepository, EventCommentRepository eventCommentRepository) {
         this.eventRepository = eventRepository;
         this.eventCommentRepository = eventCommentRepository;
-        this.eventImageRepository = eventImageRepository;
     }
 
     @Override
@@ -35,8 +34,8 @@ public class EventServiceImpl implements EventService {
         Page<Event> eventPage = eventRepository.findAll(PageRequest.of(page, size));
 
         List<EventSearchResponseItem> items = eventPage.getContent().stream()
-            .map(this::mapToResponseItem)
-            .collect(Collectors.toList());
+                .map(this::mapToResponseItem)
+                .collect(Collectors.toList());
 
         EventSearchResponse response = new EventSearchResponse();
         response.setEvents(items);
@@ -78,50 +77,6 @@ public class EventServiceImpl implements EventService {
         return response;
     }
 
-    @Override
-    public EventDetailResponse getEventDetail(Long eventId) {
-
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Event not found"));
-
-        EventDetailResponse res = new EventDetailResponse();
-
-        res.setId(event.getId());
-        res.setTitle(event.getTitle());
-        res.setDescription(event.getDescription());
-
-        // ===== CATEGORY (1 → List) =====
-        if (event.getCategory() != null) {
-            res.setCategories(List.of(event.getCategory().getName()));
-        }
-
-        // ===== LOCATION =====
-        if (event.getLocation() != null) {
-            res.setCity(event.getLocation().getCity());
-            res.setDistrict(event.getLocation().getDistrict());
-            res.setAddress(event.getLocation().getAddress());
-        }
-
-        // ===== TIME =====
-        res.setStartDate(event.getStartDatetime());
-        res.setEndDate(event.getEndDatetime());
-
-        // ===== PRICE =====
-        res.setPrice(event.getPrice());
-
-        // ===== IMAGES =====
-        if (event.getImages() != null) {
-            res.setImages(
-                    event.getImages().stream()
-                            .map(EventImage::getImageUrl)
-                            .toList()
-            );
-        }
-
-        return res;
-    }
-
     private EventSearchResponseItem mapToResponseItem(Event event) {
         EventSearchResponseItem item = new EventSearchResponseItem();
         item.setId(event.getId());
@@ -133,15 +88,18 @@ public class EventServiceImpl implements EventService {
         item.setEndDate(event.getEndDatetime());
         item.setShortDescription(event.getDescription());
         item.setPrice(event.getPrice());
-        // ✅ LẤY ẢNH ĐẦU TIÊN
-        String thumbnail = null;
-        if (event.getImages() != null && !event.getImages().isEmpty()) {
-            thumbnail = event.getImages().get(0).getImageUrl();
-        }
-        item.setImage(thumbnail);
+        double randomRating = Math.round(
+                (ThreadLocalRandom.current().nextDouble(1.0, 5.0) * 10)
+        ) / 10.0;
 
         item.setRating(randomRating);
-        item.setImage(event.getImageUrl()); // optional, add image URL field in Event if needed
+        String imageUrl = null;
+        if (event.getImages() != null && !event.getImages().isEmpty()) {
+            imageUrl = event.getImages().get(0).getImageUrl();
+        }
+        item.setImage(imageUrl);
+
+        System.out.println(event.getImageUrl());
         return item;
     }
 

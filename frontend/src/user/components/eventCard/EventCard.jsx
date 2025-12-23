@@ -3,37 +3,21 @@ import { Home, Search, Heart, Calendar, Menu, MapPin, Tag, Clock, ChevronLeft, C
 import { useNavigate } from "react-router-dom";
 import styles from "./EventCard.module.css";
 import { formatDate, formatPrice } from "../../../ultis/format";
-import { removeFromFavorite } from "../../../services/FavoriteService";
 
 export default function EventCard({ place, onCardClick, onRemoveFavorite, showRemoveButton = false }) {
-  const [isRemoving, setIsRemoving] = useState(false);
-
-  const handleRemove = async (e) => {
-    e.stopPropagation();
-    try {
-      setIsRemoving(true);
-      await removeFromFavorite(place.id);
-      onRemoveFavorite && onRemoveFavorite();
-    } catch (err) {
-      console.error('Failed to remove from favorites:', err);
-    } finally {
-      setIsRemoving(false);
-    }
-  };
 
   // Fallback image if no image is available
   const imageUrl = place.image || place.mainImageUrl || 'https://via.placeholder.com/200?text=No+Image';
 
-// Hàm tiện ích để giới hạn số ký tự
-const truncateDescription = (text, limit = 50) => {
-  if (!text) return '';
-  if (text.length <= limit) {
-    return text;
-  }
-  return text.substring(0, limit) + '...';
-};
+  // Hàm tiện ích để giới hạn số ký tự
+  const truncateDescription = (text, limit = 50) => {
+    if (!text) return '';
+    if (text.length <= limit) {
+      return text;
+    }
+    return text.substring(0, limit) + '...';
+  };
 
-export default function EventCard({ place }) {
   // 2. useNavigate フックを初期化 (Khởi tạo hook useNavigate)
   const navigate = useNavigate();
 
@@ -50,7 +34,7 @@ export default function EventCard({ place }) {
 
       <div className={styles.itemContent}>
         <h4 className={styles.itemTitle}>{place.title}</h4>
-        
+
         {/* ==== Categories ==== */}
         {place.categories?.length > 0 && (
           <div className="flex flex-wrap gap-2 mb-4">
@@ -73,14 +57,14 @@ export default function EventCard({ place }) {
         </div>
 
         {/* Time - Sử dụng padding ngang p-0 hoặc px-0 để thẳng hàng với các div khác */}
-        <div className="flex items-center gap-2 text-gray-600 mb-4 p-0 px-0"> 
+        <div className="flex items-center gap-2 text-gray-600 mb-4 p-0 px-0">
           <Clock size={18} className="text-blue-500" />
           <span className="font-medium">{formatDate(place.startDate)} - {formatDate(place.endDate)}</span>
         </div>
 
         {/* MÔ TẢ: Áp dụng hàm truncateDescription tại đây */}
         <div className={styles.desc}>
-          {truncateDescription(place.shortDescription, 50)} 
+          {truncateDescription(place.shortDescription, 50)}
         </div>
       </div>
 
@@ -95,7 +79,7 @@ export default function EventCard({ place }) {
         </div>
 
         {/* Remove from Favorites Button */}
-        {showRemoveButton && (
+        {/* {showRemoveButton && (
           <button
             className="bg-red-50 hover:bg-red-100 text-red-500 p-2 rounded transition-colors mb-2"
             onClick={handleRemove}
@@ -104,7 +88,7 @@ export default function EventCard({ place }) {
           >
             <Heart size={20} fill="currentColor" />
           </button>
-        )}
+        )} */}
 
         {/* Button */}
         <button onClick={handleDetailClick} className={styles.detailBtn}>

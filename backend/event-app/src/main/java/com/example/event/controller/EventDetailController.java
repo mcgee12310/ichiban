@@ -20,10 +20,10 @@ public class EventDetailController {
     public ResponseEntity<EventDetailResponse> getEventDetails(@PathVariable Long eventId) {
         // ✅ This is where we get the user ID from the JWT
         Long currentUserId = SecurityUtils.getCurrentUserId();
-        
+
         // ✅ This calls the service that checks 'isFavorite' in the database
         EventDetailResponse response = eventDetailService.getEventDetails(eventId, currentUserId);
-        
+
         return ResponseEntity.ok(response);
     }
 }

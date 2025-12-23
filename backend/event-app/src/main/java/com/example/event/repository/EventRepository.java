@@ -36,7 +36,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             WHERE c.event.id = :eventId
             ORDER BY c.createdAt DESC
         """)
-        List<Object[]> findEventReviewsByEventId(Long eventId);
+    List<Object[]> findEventReviewsByEventId(Long eventId);
 
     // --- 3. Query for Event Images (List<String>) ---
     // Returns a list of image URLs, ordered by whether they are the main image.
