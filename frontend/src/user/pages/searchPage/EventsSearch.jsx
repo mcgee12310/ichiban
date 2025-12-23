@@ -100,7 +100,7 @@ export default function EventsSearch() {
           現在の場所: {userLocation.city} - {userLocation.district}
         </div> {/* 翻訳: Địa điểm hiện tại: */}
         {paginated.map(place => (
-          <EventCard key={place.id} place={place} />
+          <EventCard key={place.id} place={place} onCardClick={() => navigate(`/event/${place.id}`)} />
         ))}
 
         <Pagination page={page} totalPages={totalPages} setPage={setPage} />

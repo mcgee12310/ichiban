@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Header from "../../components/header/Header";
 import { getAllEvents } from "../../../services/EventService";
-import { getFavoriteEvents } from "../../../services/FavoriteService";
+import { getFavorite } from "../../../services/FavoriteService";
 import { Search, Heart, TrendingUp, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import { formatDate } from "../../../ultis/format";
 import { useNavigate } from 'react-router-dom';
@@ -36,7 +36,7 @@ export default function HomePage() {
       setFavoritesLoading(true);
       const token = localStorage.getItem("token");
       if (token) {
-        const favorites = await getFavoriteEvents();
+        const favorites = await getFavorite();
         setFavouriteEvents(favorites || []);
       }
     } catch (error) {

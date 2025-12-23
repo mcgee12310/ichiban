@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.Optional;
+
 
 @Service
 public class AuthService {
@@ -26,23 +26,15 @@ public class AuthService {
     private JwtUtil jwtUtil;
 
     public LoginResponse login(LoginRequest loginRequest) {
+        User user = userRepository.findByEmail(loginRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("Tên đăng nhập hoặc mật khẩu không đúng"));
 
-        // Tìm người dùng theo email
-        Optional<User> userOptional = userRepository.findByEmail(loginRequest.getEmail());
-
-        if (userOptional.isEmpty()) {
-            throw new RuntimeException("Tên đăng nhập hoặc mật khẩu không đúng");
-        }
-
-        User user = userOptional.get();
-
-        // So sánh mật khẩu
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new RuntimeException("Tên đăng nhập hoặc mật khẩu không đúng");
         }
 
-        // Tạo JWT token
-        String token = jwtUtil.generateToken(user.getEmail());
+        // ✅ FIX: Pass both Email AND User ID to generate the token
+        String token = jwtUtil.generateToken(user.getEmail(), user.getId());
 
         return new LoginResponse(
                 token,
@@ -52,7 +44,6 @@ public class AuthService {
     }
 
     public LoginResponse signup(SignupRequest request) {
-
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new RuntimeException("Email đã tồn tại");
         }
@@ -62,22 +53,22 @@ public class AuthService {
         user.setFullName(request.getFullName());
         user.setGender(request.getGender());
 
-        // convert String -> LocalDate
         if (request.getBirthdate() != null && !request.getBirthdate().isEmpty()) {
-            user.setBirthdate(LocalDate.parse(request.getBirthdate())); // yyyy-MM-dd
+            user.setBirthdate(LocalDate.parse(request.getBirthdate()));
         }
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        userRepository.save(user);
+        // ✅ IMPORTANT: Save first to generate the ID
+        User savedUser = userRepository.save(user);
 
-        String token = jwtUtil.generateToken(user.getEmail());
+        // ✅ FIX: Use the ID from the savedUser to generate the token
+        String token = jwtUtil.generateToken(savedUser.getEmail(), savedUser.getId());
 
         return new LoginResponse(
                 token,
-                user.getEmail(),
+                savedUser.getEmail(),
                 "Đăng ký thành công"
         );
     }
 }
-

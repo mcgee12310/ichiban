@@ -54,6 +54,12 @@ export default function Header() {
     navigate('/events/search');
   };
 
+  const handleFavorites = () => {
+    setMobileMenuOpen(false);
+    navigate('/favorites');
+  };
+
+
   const handleAbout = () => {
     setMobileMenuOpen(false);
     navigate('');
@@ -110,6 +116,14 @@ export default function Header() {
             >
               <Search size={20} /> {/* Searchアイコンを流用 */}
               <span>スポット</span>
+            </button>
+
+            <button 
+              onClick={handleFavorites} 
+              className="flex items-center gap-2 text-gray-700 hover:text-red-500 transition-colors"
+            >
+              <Heart size={20} /> {/* Heartアイコンを流用 */}
+              <span>お気に入り</span>
             </button>
             
             {/* 翻訳: Giới thiệu -> 概要 */}

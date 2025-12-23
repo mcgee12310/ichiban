@@ -10,12 +10,14 @@ public class EventFavorite {
     @EmbeddedId
     private EventFavoriteId id;
 
-    @ManyToOne
+    // ADDITION 1: Added FetchType.LAZY for performance
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("userId")
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "fk_fav_user"))
     private User user;
 
-    @ManyToOne
+    // ADDITION 2: Added FetchType.LAZY for performance
+    @ManyToOne(fetch = FetchType.LAZY)
     @MapsId("eventId")
     @JoinColumn(name = "event_id", foreignKey = @ForeignKey(name = "fk_fav_event"))
     private Event event;
@@ -26,11 +28,22 @@ public class EventFavorite {
     // Constructors
     public EventFavorite() {}
 
-    public EventFavorite(User user, Event event) {
+    // Original Constructor: This constructor is risky as it manually sets 'id' using entity IDs.
+    // public EventFavorite(User user, Event event) {
+    //     this.user = user;
+    //     this.event = event;
+    //     this.id = new EventFavoriteId(user.getId(), event.getId());
+    // }
+
+    // ADDITION 3: A safer, more explicit constructor for use in the Service layer (if preferred over the original).
+    // This signature matches what the corrected EventFavoriteService needed.
+    public EventFavorite(EventFavoriteId id, User user, Event event, OffsetDateTime createdAt) {
+        this.id = id;
         this.user = user;
         this.event = event;
-        this.id = new EventFavoriteId(user.getId(), event.getId());
+        this.createdAt = createdAt;
     }
+
 
     // Getters and Setters
     public EventFavoriteId getId() { return id; }

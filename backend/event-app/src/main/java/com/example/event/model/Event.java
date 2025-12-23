@@ -26,12 +26,10 @@ public class Event {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    // Many events can belong to one category
     @ManyToOne
     @JoinColumn(name = "category_id", foreignKey = @ForeignKey(name = "fk_events_category"))
     private EventCategory category;
 
-    // Many events can belong to one location
     @ManyToOne
     @JoinColumn(name = "location_id", foreignKey = @ForeignKey(name = "fk_events_location"))
     private EventLocation location;
@@ -51,6 +49,9 @@ public class Event {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price = BigDecimal.ZERO;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(nullable = false, length = 20)
     private String status;
 
@@ -60,7 +61,21 @@ public class Event {
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
-    // Getters and Setters
+    // --- FIX: ADDED NO-ARG CONSTRUCTOR (MANDATORY FOR JPA) ---
+    public Event() {
+    }
+
+    // Custom Constructor
+    public Event(Long id, String title, String description, String imageUrl, BigDecimal price) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.imageUrl = imageUrl;
+        this.price = price;
+    }
+
+    // --- GETTERS AND SETTERS ---
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -84,6 +99,9 @@ public class Event {
 
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }

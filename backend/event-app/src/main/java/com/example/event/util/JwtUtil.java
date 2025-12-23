@@ -19,11 +19,16 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secret;
     
-    @Value("${jwt.expiration:86400000}") // Default 24 hours
+    @Value("${jwt.expiration:86400000}") 
     private Long expiration;
     
     private SecretKey getSigningKey() {
         return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    }
+    
+    // ✅ Extract User ID from the custom claim
+    public Long extractUserId(String token) {
+        return extractClaim(token, claims -> claims.get("userId", Long.class));
     }
     
     public String extractUsername(String token) {
@@ -51,8 +56,10 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
     
-    public String generateToken(String username) {
+    // ✅ Updated to accept userId
+    public String generateToken(String username, Long userId) {
         Map<String, Object> claims = new HashMap<>();
+        claims.put("userId", userId); // Put the ID into the token payload
         return createToken(claims, username);
     }
     
@@ -71,4 +78,3 @@ public class JwtUtil {
         return (extractedUsername.equals(username) && !isTokenExpired(token));
     }
 }
-

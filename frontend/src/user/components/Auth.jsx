@@ -89,13 +89,13 @@ const SocialButton = ({ provider, onClick }) => (
 const LocalMessagePage = ({ username, onBackToLogin }) => (
   <div className="min-h-screen bg-white flex flex-col items-center justify-center space-y-4">
     <p className="text-xl text-gray-800">
-      Đăng nhập thành công. Xin chào {username || 'bạn'}!
+      Login successful. Hello {username || 'there'}!
     </p>
     <button
       onClick={onBackToLogin}
       className="px-4 py-2 border border-gray-400 rounded hover:bg-gray-100"
     >
-      Quay lại trang đăng nhập
+      Back to Login
     </button>
   </div>
 );
@@ -111,13 +111,13 @@ const LoginForm = ({ onSwitchToRegister, onLoginSuccess }) => {
   const handleLogin = async () => {
     setLoading(true);
     try {
-      // GỌI API ĐĂNG NHẬP
+      // CALL LOGIN API
       const data = await loginAPICall(username, password);
       console.log("Login ok:", data);
       navigate('/events/search');
     } catch (err) {
       console.error("Login fail:", err);
-      alert("Đăng nhập thất bại");
+      alert("Login failed");
     } finally {
       setLoading(false);
     }

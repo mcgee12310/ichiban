@@ -60,7 +60,7 @@ function SearchBox({ filters, setFilters, onSearch }) {
         </button>
       </div>
 
-      {/* Hàng 2 */}
+      {/* Row 2 */}
       <div className={styles.grid}>
         {/* Range */}
         <div className={styles.field}>
