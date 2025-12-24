@@ -321,10 +321,20 @@ function CalendarComponent({ events = [] }) {
 
 // Event Item Card Component
 function EventItemCard({ event, compact = false }) {
+  const navigate = useNavigate();
   const defaultImage = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=400";
   
+  const handleClick = () => {
+    if (event.id) {
+      navigate(`/events/${event.id}`);
+    }
+  };
+  
   return (
-    <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 flex gap-4 items-start hover:bg-white transition-all hover:shadow-md border border-pink-100">
+    <div 
+      onClick={handleClick}
+      className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 flex gap-4 items-start hover:bg-white transition-all hover:shadow-md border border-pink-100 cursor-pointer"
+    >
       {/* Image */}
       <img
         src={event.image || defaultImage}
