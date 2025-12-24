@@ -1,8 +1,15 @@
 import { useState, useMemo } from "react";
+import { useParams } from "react-router-dom";
 import { Star, Plus, LogIn } from "lucide-react";
 import ReviewItem from "./ReviewItem";
+import {
+  createEventComment,
+  updateEventComment,
+  deleteEventComment
+} from "../../services/EventService";
 
 function ReviewSection({ reviews, setReviews, isLoggedIn }) {
+  const { eventId } = useParams();
   const [showCreateForm, setShowCreateForm] = useState(false);
 
   // Kiểm tra xem user đã có review chưa
@@ -45,41 +52,47 @@ function ReviewSection({ reviews, setReviews, isLoggedIn }) {
 
   // Handle update/create
   const handleReviewUpdate = async (id, data) => {
+    const { content, rating } = data;
+
     if (id === 'new-review') {
-      // Tạo mới review
+      // ===== CREATE =====
       try {
-        // TODO: Call API để tạo review
-        // const response = await api.createReview(data);
-        
-        // Mock data cho demo
-        const newReview = {
-          id: Date.now().toString(),
-          userName: 'あなた', // Lấy từ user context thực tế
-          ...data,
-          isMyComment: true,
-          createdAt: new Date().toISOString(),
-        };
-        
-        setReviews(prev => [newReview, ...prev]);
+        const response = await createEventComment(
+          eventId,
+          content,
+          rating
+        );
+
+        setReviews(prev => [
+          {
+            ...response,
+            isMyComment: true
+          },
+          ...prev
+        ]);
+
         setShowCreateForm(false);
       } catch (error) {
-        console.error('Failed to create review:', error);
+        console.error("Create comment failed:", error);
       }
     } else {
-      // Update review hiện có
+      // ===== UPDATE =====
       try {
-        // TODO: Call API để update review
-        // await api.updateReview(id, data);
-        
+        const response = await updateEventComment(
+          id,
+          content,
+          rating
+        );
+
         setReviews(prev =>
           prev.map(r =>
-            r.id === id 
-              ? { ...r, ...data, updatedAt: new Date().toISOString() } 
+            r.id === id
+              ? { ...response, isMyComment: true }
               : r
           )
         );
       } catch (error) {
-        console.error('Failed to update review:', error);
+        console.error("Update comment failed:", error);
       }
     }
   };
@@ -87,6 +100,15 @@ function ReviewSection({ reviews, setReviews, isLoggedIn }) {
   const handleCancelCreate = () => {
     setShowCreateForm(false);
   };
+
+  const handleDeleteReview = async (commentId) => {
+  try {
+    await deleteEventComment(commentId);
+    setReviews(prev => prev.filter(r => r.id !== commentId));
+  } catch (error) {
+    console.error("Delete comment failed:", error);
+  }
+};
 
   return (
     <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -140,6 +162,7 @@ function ReviewSection({ reviews, setReviews, isLoggedIn }) {
               key={review.id}
               review={review}
               onUpdate={handleReviewUpdate}
+              onDelete={handleDeleteReview}
               onCancel={review.id === 'new-review' ? handleCancelCreate : undefined}
               isLoggedIn={isLoggedIn}
             />

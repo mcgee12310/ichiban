@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Star, Edit2, X, Check } from "lucide-react";
 import { formatDate } from "../../ultis/format";
 
-function ReviewItem({ review, onUpdate, onCancel, isLoggedIn = false }) {
+function ReviewItem({ review, onUpdate, onDelete, onCancel, isLoggedIn = false }) {
   // Kiểm tra xem có phải review mới (đang tạo) hay không
   const isNewReview = review.id === 'new-review';
   const hasMyComment = review.isMyComment && review.content?.trim();
@@ -50,6 +50,17 @@ function ReviewItem({ review, onUpdate, onCancel, isLoggedIn = false }) {
     }
   };
 
+  const handleDelete = async () => {
+    const confirmed = window.confirm("このレビューを削除しますか？");
+    if (!confirmed) return;
+
+    try {
+      await onDelete?.(review.id);
+    } catch (error) {
+      console.error("Delete comment failed:", error);
+    }
+  };
+
   return (
     <div className="relative bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-5 border border-gray-100">
       {/* Header */}
@@ -80,11 +91,10 @@ function ReviewItem({ review, onUpdate, onCancel, isLoggedIn = false }) {
                 key={i}
                 size={16}
                 onClick={() => isEditing && setEditRating(i + 1)}
-                className={`${isEditing ? 'cursor-pointer' : 'cursor-default'} ${
-                  i < editRating
-                    ? "fill-yellow-400 text-yellow-400"
-                    : "text-gray-300"
-                }`}
+                className={`${isEditing ? 'cursor-pointer' : 'cursor-default'} ${i < editRating
+                  ? "fill-yellow-400 text-yellow-400"
+                  : "text-gray-300"
+                  }`}
               />
             ))}
           </div>
@@ -135,13 +145,23 @@ function ReviewItem({ review, onUpdate, onCancel, isLoggedIn = false }) {
 
       {/* Edit button – chỉ khi đã có comment và đã login */}
       {hasMyComment && !isEditing && isLoggedIn && !isNewReview && (
-        <button
-          onClick={() => setIsEditing(true)}
-          className="absolute bottom-4 right-4 text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
-        >
-          <Edit2 size={14} />
-          編集
-        </button>
+        <div className="absolute bottom-4 right-4 flex gap-3">
+          <button
+            onClick={() => setIsEditing(true)}
+            className="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1 transition-colors"
+          >
+            <Edit2 size={14} />
+            編集
+          </button>
+
+          <button
+            onClick={handleDelete}
+            className="text-sm text-red-600 hover:text-red-800 flex items-center gap-1 transition-colors"
+          >
+            <X size={14} />
+            削除
+          </button>
+        </div>
       )}
     </div>
   );
