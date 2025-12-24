@@ -89,12 +89,11 @@ public class EventServiceImpl implements EventService {
         item.setEndDate(event.getEndDatetime());
         item.setShortDescription(event.getDescription());
         item.setPrice(event.getPrice());
-        double randomRating = Math.round(
-                (ThreadLocalRandom.current().nextDouble(1.0, 5.0) * 10)
-        ) / 10.0;
 
-        item.setRating(randomRating);
-        // Only get image from event_images table
+        Double avg = eventCommentRepository
+                .findAverageRatingByEventId(event.getId());
+        item.setRating(avg != null ? avg : 0.0);
+
         String imageUrl = null;
         if (event.getImages() != null && !event.getImages().isEmpty()) {
             imageUrl = event.getImages().get(0).getImageUrl();

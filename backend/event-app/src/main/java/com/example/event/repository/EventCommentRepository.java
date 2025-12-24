@@ -23,4 +23,11 @@ public interface EventCommentRepository extends JpaRepository<EventComment, Long
     
     // Used for PUT and DELETE to ensure the comment belongs to the user
     Optional<EventComment> findByIdAndUserId(Long id, Long userId);
+
+    @Query("""
+        SELECT AVG(r.rating)
+        FROM EventComment r
+        WHERE r.event.id = :eventId
+    """)
+    Double findAverageRatingByEventId(Long eventId);
 }

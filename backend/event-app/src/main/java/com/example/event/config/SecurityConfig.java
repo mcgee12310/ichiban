@@ -52,45 +52,51 @@ public class SecurityConfig {
         http
                 // 1. Disable CSRF for Stateless JWT APIs
                 .csrf(csrf -> csrf.disable())
-                
+
                 // 2. Configure CORS - Fixed for allowCredentials
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:5173")); // Explicit origin
-                    config.setAllowedOrigins(List.of("https://happy-weekend.vercel.app")); // Explicit origin
+                    config.setAllowedOrigins(List.of(
+                            "http://localhost:5173",
+                             "https://happy-weekend.vercel.app"
+                    ));
                     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(List.of("*"));
-                    config.setAllowCredentials(true); 
+                    config.setAllowCredentials(true);
                     return config;
                 }))
 
                 // 3. Define Authorization Rules
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Allow Pre-flight
+                        // 1. Preflight
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        
-                        // 2. Auth endpoints
-                        .requestMatchers("/api/auth/**").permitAll() 
-                        
-                        // 3. Public Event Access
-                        // Allow public GET for event list/details
+
+                        // 2. Auth
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // 3. Public events
                         .requestMatchers(HttpMethod.GET, "/api/events/**").permitAll()
-                        // ADD THIS: Allow public POST for the search/filter feature
-                        .requestMatchers(HttpMethod.POST, "/api/events/search").permitAll() 
-                        
-                        // 4. Secured endpoints
-                        .requestMatchers("/api/comment/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/events/search").permitAll()
+
+                        // 4. Public READ comments
+                        .requestMatchers(HttpMethod.GET, "/api/comment/**").permitAll()
+
+                        // ❌ Các action khác cần login
+                        .requestMatchers(HttpMethod.POST, "/api/comment/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/comment/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/comment/**").authenticated()
+
+                        // 6. Favorites always require login
                         .requestMatchers("/api/favorites/**").authenticated()
-                        
-                        .anyRequest().authenticated()
-                )
+
+                        .anyRequest().authenticated())
 
                 // 4. Configure Stateless Session
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                
+
                 // 5. Set Authentication Provider
                 .authenticationProvider(authenticationProvider())
-                
+
                 // 6. Add JWT Filter before UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

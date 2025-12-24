@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { Home, Search, Heart, Calendar, Menu, MapPin, Tag, Clock, ChevronLeft, ChevronRight, Share2, Star, ArrowLeft, Navigation } from 'lucide-react';
 import Header from '../components/header/Header';
+import ReviewSection from "../components/ReviewSection";
+import ReviewItem from "../components/ReviewItem";
 import { getEventDetail, getEventReviews } from '../../services/EventService'
 import { addFavorite, removeFavorite } from '../../services/FavoriteService';
 import { formatDate, formatPrice } from "../../ultis/format";
@@ -9,12 +11,17 @@ import { formatDate, formatPrice } from "../../ultis/format";
 export default function PlaceDetailPage() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const { eventId } = useParams();
-
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [place, setPlace] = useState(null);
   const [loading, setLoading] = useState(true);
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
   const [reviews, setReviews] = useState([]);
+  const sortedReviews = [...reviews].sort((a, b) => {
+    if (a.isMyComment && !b.isMyComment) return -1;
+    if (!a.isMyComment && b.isMyComment) return 1;
+    return new Date(b.createdAt) - new Date(a.createdAt); // mới hơn lên trước
+  });
   const [isFavorited, setIsFavorited] = useState(false);
   const [isUpdatingFavorite, setIsUpdatingFavorite] = useState(false);
 
@@ -25,18 +32,6 @@ export default function PlaceDetailPage() {
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + place.images.length) % place.images.length);
-  };
-
-  const handleShare = () => {
-    if (navigator.share) {
-      navigator.share({
-        title: place.name,
-        text: place.description,
-        url: window.location.href
-      });
-    } else {
-      alert('この機能はお使いのブラウザではサポートされていません');
-    }
   };
 
   const openInGoogleMaps = () => {
@@ -69,15 +64,29 @@ export default function PlaceDetailPage() {
       try {
         setLoading(true);
 
+        const token = localStorage.getItem('token');
+        if (token) {
+      setIsLoggedIn(true);
+    }
         const eventDetail = await getEventDetail(eventId);
         setPlace(eventDetail);
         setIsFavorited(eventDetail.isFavorite || false);
         console.log(eventDetail);
 
-        const reviewRes = await getEventReviews(eventId, "latest");
-        setReviews(reviewRes.reviews || []);
-        setAverageRating(reviewRes.averageRating);
-        setTotalReviews(reviewRes.totalReviews);
+        const reviewRes = await getEventReviews(eventId);
+        console.log(reviewRes);
+        setReviews(reviewRes || []);
+
+        const totalReviews = reviewRes.length;
+        const averageRating =
+          totalReviews === 0
+            ? 0
+            : (
+              reviewRes.reduce((sum, r) => sum + r.rating, 0) / totalReviews
+            ).toFixed(1);
+
+        setAverageRating(averageRating);
+        setTotalReviews(totalReviews);
       } catch (error) {
         console.error("Load event detail failed:", error);
       } finally {
@@ -240,49 +249,11 @@ export default function PlaceDetailPage() {
             </div>
 
             {/* Review Section */}
-            <div className="bg-white rounded-2xl shadow-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                  レビュー
-                </h2>
-
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <div className="flex items-center gap-1">
-                    <Star className="text-yellow-500 fill-yellow-500" size={16} />
-                    <span className="font-semibold text-gray-900">
-                      {averageRating}
-                    </span>
-                  </div>
-                  <span>({totalReviews} 件)</span>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                {reviews.map((review, index) => (
-                  <div key={index} className="bg-gradient-to-br from-gray-50 to-blue-50 rounded-xl p-5 hover:shadow-md transition-all border border-gray-100">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="w-12 h-12 bg-gradient-to-br from-red-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-md">
-                        {review.userName.charAt(0)}
-                      </div>
-                      <div className="flex-1">
-                        <h4 className="font-semibold text-gray-900">{review.userName}</h4>
-                        <div className="flex items-center gap-1">
-                          {[...Array(5)].map((_, i) => (
-                            <Star
-                              key={i}
-                              size={14}
-                              className={i < review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                      <span className="text-sm text-gray-500 font-medium">{review.date}</span>
-                    </div>
-                    <p className="text-gray-700 leading-relaxed">{review.comment}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <ReviewSection
+              reviews={reviews}
+              setReviews={setReviews}
+              isLoggedIn={isLoggedIn}
+            />
           </div>
         </div>
       </main>
