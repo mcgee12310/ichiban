@@ -1,13 +1,9 @@
 package com.example.event.service;
 
-import com.example.event.dto.response.EventSearchResponse;
-import com.example.event.dto.response.EventSearchResponseItem;
-import com.example.event.dto.response.EventReviewResponse;
-import com.example.event.dto.response.EventReviewResponseItem;
-import com.example.event.model.Event;
-import com.example.event.model.EventComment;
-import com.example.event.repository.EventCommentRepository;
-import com.example.event.repository.EventRepository;
+import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -15,9 +11,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.concurrent.ThreadLocalRandom;
+import com.example.event.dto.response.EventReviewResponse;
+import com.example.event.dto.response.EventReviewResponseItem;
+import com.example.event.dto.response.EventSearchResponse;
+import com.example.event.dto.response.EventSearchResponseItem;
+import com.example.event.model.Event;
+import com.example.event.model.EventComment;
+import com.example.event.repository.EventCommentRepository;
+import com.example.event.repository.EventRepository;
 @Service
 public class EventServiceImpl implements EventService {
 
@@ -93,13 +94,12 @@ public class EventServiceImpl implements EventService {
         ) / 10.0;
 
         item.setRating(randomRating);
+        // Only get image from event_images table
         String imageUrl = null;
         if (event.getImages() != null && !event.getImages().isEmpty()) {
             imageUrl = event.getImages().get(0).getImageUrl();
         }
         item.setImage(imageUrl);
-
-        System.out.println(event.getImageUrl());
         return item;
     }
 

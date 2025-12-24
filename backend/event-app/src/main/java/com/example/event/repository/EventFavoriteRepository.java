@@ -29,21 +29,12 @@ public interface EventFavoriteRepository extends JpaRepository<EventFavorite, Ev
     void deleteById_UserIdAndId_EventId(Long userId, Long eventId);
 
     @Query("""
-            SELECT 
-                e.id AS id, 
-                e.title AS title, 
-                e.startDatetime AS startDatetime,
-                el.city AS locationCity, 
-                e.price AS price, 
-                COALESCE(
-                    (SELECT ei.imageUrl FROM EventImage ei WHERE ei.event.id = e.id ORDER BY ei.id ASC LIMIT 1),
-                    e.imageUrl
-                ) AS mainImageUrl 
-            FROM EventFavorite ef 
-            JOIN ef.event e 
-            JOIN e.location el 
+            SELECT ef FROM EventFavorite ef 
+            JOIN FETCH ef.event e 
+            LEFT JOIN FETCH e.images 
+            LEFT JOIN FETCH e.location 
             WHERE ef.id.userId = :userId 
             ORDER BY ef.createdAt DESC
         """)
-    List<EventSummaryProjection> findFavoriteEventsSummaryByUserId(Long userId);
+    List<EventFavorite> findByUserIdWithEventAndImages(@Param("userId") Long userId);
 }
